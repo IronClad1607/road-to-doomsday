@@ -1,0 +1,94 @@
+.protocol {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 10px;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--shell-muted);
+  border-bottom: 1px solid var(--shell-line);
+}
+
+.purge {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--shell-muted);
+  border: 1px solid var(--shell-line);
+  padding: 6px 8px;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+/* Armed state: one more click wipes everything, so it stops being quiet. */
+.purgeArmed {
+  color: #d9a15c;
+  border-color: var(--gold);
+}
+
+.masthead {
+  position: relative;
+  padding: 26px 0 18px;
+  border-bottom: 1px solid var(--shell-line);
+  background: radial-gradient(120% 90% at 50% 0%, rgba(31, 61, 43, 0.55), transparent 70%);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 0.82;
+  letter-spacing: -0.01em;
+  font-size: clamp(56px, 17vw, 104px);
+  color: var(--shell-ink);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.titleAccent {
+  display: block;
+  letter-spacing: normal;
+  color: var(--green);
+  -webkit-text-stroke: 1px var(--gold);
+  text-shadow: 0 0 34px rgba(47, 107, 69, 0.55);
+}
+
+.showtime {
+  margin-top: 12px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+}
+
+.countdown {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.cell {
+  border: 1px solid #2b3a2f;
+  background: #0f130f;
+  padding: 10px 4px;
+  text-align: center;
+}
+
+.value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 34px;
+  line-height: 1;
+  color: var(--shell-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.seconds {
+  color: var(--gold);
+}
+
+.unit {
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: var(--shell-muted);
+  margin-top: 4px;
+}
