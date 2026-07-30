@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { EraSection } from './components/EraSection';
 import { Header } from './components/Header';
 import { ModeSelector } from './components/ModeSelector';
 import { Readiness } from './components/Readiness';
@@ -24,6 +25,17 @@ export function App() {
         <Readiness readiness={readiness} />
         <div className={styles.divider}>THE SPINE</div>
       </div>
+
+      {CATALOG.map((era) => (
+        <EraSection
+          key={era.id}
+          era={era}
+          watched={tracker.watched}
+          mode={tracker.mode}
+          progress={readiness.perEra.get(era.id) ?? { done: 0, inMode: 0 }}
+          onToggleEntry={tracker.toggleEntry}
+        />
+      ))}
     </div>
   );
 }

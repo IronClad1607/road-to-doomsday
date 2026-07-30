@@ -1,0 +1,170 @@
+.card {
+  background: var(--era-card);
+  border: 1px solid var(--era-border);
+  border-left: 4px solid transparent;
+  transition: opacity 0.3s, border-color 0.3s;
+}
+
+.cardPartial {
+  border-left-color: var(--era-accent-soft);
+}
+
+.cardFull {
+  border-color: var(--era-accent);
+}
+
+/* Outside the selected plan — still listed, but visibly not your problem. */
+.cardOut {
+  opacity: 0.44;
+}
+
+.inner {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+}
+
+.poster {
+  position: relative;
+  flex: 0 0 78px;
+  width: 78px;
+  height: 104px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--era-poster-ink);
+  background: var(--era-poster-bg);
+  border: 1px solid var(--era-border);
+  filter: saturate(0.55);
+  transition: filter 0.3s;
+}
+
+/* Watched entries come into full colour. */
+.posterWatched {
+  filter: none;
+}
+
+.glyph {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 26px;
+  line-height: 0.86;
+  letter-spacing: -0.02em;
+  text-align: center;
+  padding: 4px;
+}
+
+.kind {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 7px;
+  letter-spacing: 0.14em;
+  text-align: center;
+  padding: 3px 2px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #efe6d6;
+}
+
+.details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+}
+
+.year {
+  border: 1px solid var(--era-border);
+  color: var(--era-accent);
+  padding: 2px 5px;
+}
+
+.runtime {
+  color: var(--era-sub);
+}
+
+.stingers {
+  background: var(--era-accent);
+  color: #0b0908;
+  padding: 2px 5px;
+  font-weight: 600;
+}
+
+.drop {
+  border: 1px dashed var(--gold);
+  color: #d9a15c;
+  padding: 2px 5px;
+  animation: rtdBreathe 3s ease-in-out infinite;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(21px, 5.6vw, 27px);
+  line-height: 0.94;
+  text-transform: uppercase;
+  color: var(--era-ink);
+  margin: 0;
+}
+
+.clue {
+  font-size: 10px;
+  line-height: 1.55;
+  color: var(--era-sub);
+  margin: 0;
+}
+
+.clueLabel {
+  color: var(--era-accent);
+  letter-spacing: 0.1em;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.check {
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 0 12px;
+  border: 1px solid var(--era-border);
+  background: transparent;
+  color: var(--era-sub);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.checkDone {
+  border-color: var(--era-accent);
+  background: var(--era-accent);
+  color: #0b0908;
+}
+
+.service {
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--era-border);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--era-ink);
+}
