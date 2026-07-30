@@ -1,0 +1,31 @@
+.shell {
+  min-height: 100vh;
+  background: var(--shell-bg);
+  padding-bottom: 80px;
+  overflow-x: hidden;
+}
+
+/* The centred column everything outside the full-bleed era sections sits in. */
+.rail {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 0 var(--content-pad);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 4px;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--shell-muted);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--shell-line);
+}
