@@ -158,6 +158,15 @@
   color: #0b0908;
 }
 
+.episodes {
+  min-height: var(--tap);
+  padding: 0 10px;
+  border: 1px solid var(--era-border);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--era-accent);
+}
+
 .service {
   min-height: var(--tap);
   display: inline-flex;

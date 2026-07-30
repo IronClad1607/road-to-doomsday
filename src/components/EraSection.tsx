@@ -1,12 +1,5 @@
-import type { Entry, Era, Mode } from '../data/types';
-import {
-  isFullyWatched,
-  isInMode,
-  isPartiallyWatched,
-  watchedEpisodeCount,
-  type EraProgress,
-  type WatchedState,
-} from '../lib/progress';
+import type { Entry, Era, Mode, Series } from '../data/types';
+import { isInMode, type EraProgress, type WatchedState } from '../lib/progress';
 import { eraVars } from '../styles/eraVars';
 import { EntryCard } from './EntryCard';
 import styles from './EraSection.module.css';
@@ -16,10 +9,22 @@ interface EraSectionProps {
   watched: WatchedState;
   mode: Mode;
   progress: EraProgress;
+  open: ReadonlySet<string>;
   onToggleEntry: (entry: Entry) => void;
+  onToggleEpisode: (entry: Series, index: number) => void;
+  onToggleOpen: (entry: Entry) => void;
 }
 
-export function EraSection({ era, watched, mode, progress, onToggleEntry }: EraSectionProps) {
+export function EraSection({
+  era,
+  watched,
+  mode,
+  progress,
+  open,
+  onToggleEntry,
+  onToggleEpisode,
+  onToggleOpen,
+}: EraSectionProps) {
   return (
     <section
       className={`${styles.era} ${era.parallel ? styles.eraParallel : ''}`}
@@ -47,16 +52,12 @@ export function EraSection({ era, watched, mode, progress, onToggleEntry }: EraS
             <EntryCard
               key={entry.id}
               entry={entry}
-              status={
-                isFullyWatched(entry, watched)
-                  ? 'full'
-                  : isPartiallyWatched(entry, watched)
-                    ? 'partial'
-                    : 'none'
-              }
+              progress={watched[entry.id]}
               inMode={isInMode(entry, mode)}
-              episodesWatched={watchedEpisodeCount(entry, watched)}
+              open={open.has(entry.id)}
               onToggle={onToggleEntry}
+              onToggleEpisode={onToggleEpisode}
+              onToggleOpen={onToggleOpen}
             />
           ))}
         </div>

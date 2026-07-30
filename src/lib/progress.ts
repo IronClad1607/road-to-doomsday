@@ -60,31 +60,53 @@ export const RANKS: readonly (readonly [threshold: number, name: string])[] = [
  */
 const EPSILON = 0.01;
 
+/**
+ * One entry's slice of {@link WatchedState}. Passing this around instead of
+ * the whole map keeps a card's props stable while unrelated entries change.
+ */
+export type EntryProgress = true | readonly number[] | undefined;
+
+export type EntryStatus = 'none' | 'partial' | 'full';
+
 /** Total runtime of an entry in minutes. */
 export function runtimeMinutes(entry: Entry): number {
   return entry.kind === 'series' ? entry.episodes.length * entry.episodeMinutes : entry.minutes;
 }
 
+/** Episodes of a series watched so far. Always 0 for films. */
+export function episodesWatched(entry: Entry, progress: EntryProgress): number {
+  if (entry.kind !== 'series' || !Array.isArray(progress)) return 0;
+  return progress.length;
+}
+
+/** Minutes logged against an entry so far. */
+export function minutesWatched(entry: Entry, progress: EntryProgress): number {
+  if (entry.kind === 'film') return progress ? entry.minutes : 0;
+  return episodesWatched(entry, progress) * entry.episodeMinutes;
+}
+
+export function statusOf(entry: Entry, progress: EntryProgress): EntryStatus {
+  const logged = minutesWatched(entry, progress);
+  if (logged >= runtimeMinutes(entry) - EPSILON) return 'full';
+  return logged > 0 ? 'partial' : 'none';
+}
+
 /** How many episodes of a series have been watched. Always 0 for films. */
 export function watchedEpisodeCount(entry: Entry, watched: WatchedState): number {
-  if (entry.kind !== 'series') return 0;
-  const progress = watched[entry.id];
-  return Array.isArray(progress) ? progress.length : 0;
+  return episodesWatched(entry, watched[entry.id]);
 }
 
 /** Minutes logged against an entry so far. */
 export function watchedMinutes(entry: Entry, watched: WatchedState): number {
-  if (entry.kind === 'film') return watched[entry.id] ? entry.minutes : 0;
-  return watchedEpisodeCount(entry, watched) * entry.episodeMinutes;
+  return minutesWatched(entry, watched[entry.id]);
 }
 
 export function isFullyWatched(entry: Entry, watched: WatchedState): boolean {
-  return watchedMinutes(entry, watched) >= runtimeMinutes(entry) - EPSILON;
+  return statusOf(entry, watched[entry.id]) === 'full';
 }
 
 export function isPartiallyWatched(entry: Entry, watched: WatchedState): boolean {
-  const logged = watchedMinutes(entry, watched);
-  return logged > 0 && logged < runtimeMinutes(entry) - EPSILON;
+  return statusOf(entry, watched[entry.id]) === 'partial';
 }
 
 /** Whether an entry falls inside the currently selected plan. */

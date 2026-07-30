@@ -33,7 +33,10 @@ export function App() {
           watched={tracker.watched}
           mode={tracker.mode}
           progress={readiness.perEra.get(era.id) ?? { done: 0, inMode: 0 }}
+          open={tracker.open}
           onToggleEntry={tracker.toggleEntry}
+          onToggleEpisode={tracker.toggleEpisode}
+          onToggleOpen={tracker.toggleOpen}
         />
       ))}
     </div>
