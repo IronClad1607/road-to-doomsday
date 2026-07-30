@@ -1,0 +1,63 @@
+.panel {
+  position: relative;
+  overflow: hidden;
+  padding: 22px 18px;
+  border: 1px solid #243026;
+  background: linear-gradient(180deg, #0f130f, #0b0d0b);
+  filter: grayscale(0.5);
+  transition: filter 0.6s ease, border-color 0.6s ease;
+}
+
+.panelUnlocked {
+  border-color: var(--gold);
+  background: radial-gradient(120% 100% at 50% 0%, #244a31, #0b140e);
+  filter: none;
+}
+
+/* Diagonal hatching, like an embossed seal. */
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(168, 118, 62, 0.14) 0 6px,
+    transparent 6px 14px
+  );
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+}
+
+.seal {
+  font-size: 9px;
+  letter-spacing: 0.26em;
+  color: var(--gold);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(38px, 11vw, 64px);
+  line-height: 0.86;
+  text-transform: uppercase;
+  margin: 8px 0 0;
+  color: var(--shell-ink);
+}
+
+.body {
+  font-size: 11px;
+  line-height: 1.65;
+  color: #b9ae9c;
+  margin: 10px 0 0;
+  max-width: 42ch;
+}
+
+.foot {
+  margin-top: 14px;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--green);
+}

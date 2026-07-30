@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 import { EraSection } from './components/EraSection';
+import { Finale } from './components/Finale';
+import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { ModeSelector } from './components/ModeSelector';
 import { Readiness } from './components/Readiness';
@@ -39,6 +41,11 @@ export function App() {
           onToggleOpen={tracker.toggleOpen}
         />
       ))}
+
+      <div className={styles.outro}>
+        <Finale pct={readiness.pct} />
+        <Footer rank={readiness.rank} />
+      </div>
     </div>
   );
 }

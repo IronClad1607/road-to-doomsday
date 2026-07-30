@@ -12,6 +12,12 @@
   padding: 0 var(--content-pad);
 }
 
+.outro {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 34px var(--content-pad) 0;
+}
+
 .divider {
   display: flex;
   align-items: center;
