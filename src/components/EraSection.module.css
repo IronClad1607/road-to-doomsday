@@ -11,7 +11,7 @@
 
 /* Torn edge between eras — a ragged strip of accent hatching. */
 .seam {
-  height: 22px;
+  height: 14px;
   background: repeating-linear-gradient(
     135deg,
     var(--era-accent-seam) 0 6px,
@@ -20,54 +20,91 @@
   clip-path: polygon(0 0, 100% 0, 100% 42%, 86% 100%, 64% 30%, 41% 100%, 18% 34%, 0 92%);
 }
 
-.body {
-  max-width: var(--content-width);
-  margin: 0 auto;
-  padding: 0 var(--content-pad) 34px;
-}
-
+/* The whole header is the accordion control, so it spans the content rail. */
 .head {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-end;
   gap: 10px;
-  padding: 18px 0 14px;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 12px var(--content-pad);
+  text-align: left;
+}
+
+.headText {
+  display: block;
+  min-width: 0;
 }
 
 .span {
-  font-size: 9px;
-  letter-spacing: 0.24em;
+  display: block;
+  font-size: 8px;
+  letter-spacing: 0.2em;
   color: var(--era-accent);
 }
 
 .name {
+  display: block;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: clamp(30px, 8vw, 46px);
+  font-size: clamp(24px, 6.5vw, 36px);
   line-height: 0.9;
   text-transform: uppercase;
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   color: var(--era-ink);
 }
 
 .dialect {
-  font-size: 9px;
-  letter-spacing: 0.1em;
+  display: block;
+  font-size: 8px;
+  letter-spacing: 0.08em;
   color: var(--era-sub);
-  margin-top: 5px;
+  margin-top: 3px;
   font-style: italic;
+}
+
+.headMeta {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .progress {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 22px;
+  font-size: 20px;
   color: var(--era-accent);
   white-space: nowrap;
+}
+
+.chevron {
+  font-size: 11px;
+  color: var(--era-accent);
+  transition: transform 0.25s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.body {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 0 var(--content-pad) 22px;
 }
 
 .entries {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
+}
+
+.empty {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--era-sub);
+  padding: 6px 0 2px;
 }
