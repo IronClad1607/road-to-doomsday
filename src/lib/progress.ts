@@ -165,6 +165,48 @@ export function computeReadiness(
   return { pct, doneMinutes, totalMinutes, rank: rankFor(pct), perEra };
 }
 
+/** Eras with at least one entry in the selected plan. */
+export function erasInMode(catalog: readonly Era[], mode: Mode): readonly Era[] {
+  return catalog.filter((era) => era.entries.some((entry) => isInMode(entry, mode)));
+}
+
+export interface NextUp {
+  entry: Entry;
+  era: Era;
+}
+
+/**
+ * The next thing to watch: the first entry in story order that is inside the
+ * plan and not yet fully logged. Null once the plan is complete.
+ */
+export function nextUnwatched(
+  catalog: readonly Era[],
+  watched: WatchedState,
+  mode: Mode,
+): NextUp | null {
+  for (const era of catalog) {
+    for (const entry of era.entries) {
+      if (!isInMode(entry, mode)) continue;
+      if (statusOf(entry, watched[entry.id]) !== 'full') return { entry, era };
+    }
+  }
+  return null;
+}
+
+/**
+ * Which era to expand when nothing was restored from storage — the first with
+ * unfinished business, rather than simply the first in the list.
+ */
+export function eraToAutoOpen(
+  catalog: readonly Era[],
+  watched: WatchedState,
+  mode: Mode,
+): string | null {
+  const next = nextUnwatched(catalog, watched, mode);
+  if (next) return next.era.id;
+  return erasInMode(catalog, mode)[0]?.id ?? null;
+}
+
 /** The highest rank earned at this readiness percentage. */
 export function rankFor(pct: number): string {
   let name = 'CIVILIAN BYSTANDER';

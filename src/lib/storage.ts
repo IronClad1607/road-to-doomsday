@@ -1,4 +1,4 @@
-import { ALL_ENTRIES } from '../data/catalog';
+import { ALL_ENTRIES, CATALOG } from '../data/catalog';
 import type { Entry, Mode } from '../data/types';
 import { MODES, type WatchedState } from './progress';
 
@@ -21,16 +21,26 @@ export interface TrackerState {
   watched: WatchedState;
   /** Ids of series whose episode lists are expanded. */
   open: readonly string[];
+  /**
+   * Id of the era currently expanded in the accordion, or null for none.
+   * Only one era is open at a time.
+   */
+  openEra: string | null;
+  /** Whether fully-logged entries are filtered out of the lists. */
+  hideLogged: boolean;
 }
 
 export const DEFAULT_STATE: TrackerState = {
   mode: 'completionist',
   watched: {},
   open: [],
+  openEra: null,
+  hideLogged: false,
 };
 
 const ENTRIES_BY_ID = new Map<string, Entry>(ALL_ENTRIES.map((entry) => [entry.id, entry]));
 const VALID_MODES = new Set<string>(MODES.map((mode) => mode.id));
+const ERA_IDS = new Set<string>(CATALOG.map((era) => era.id));
 
 function isMode(value: unknown): value is Mode {
   return typeof value === 'string' && VALID_MODES.has(value);
@@ -84,7 +94,19 @@ export function sanitiseState(raw: unknown): TrackerState {
       )
     : [];
 
-  return { mode, watched, open: [...new Set(open)] };
+  // An era can be retired between visits, in which case the stored id no
+  // longer names anything openable — fall back to none and let the auto-open
+  // pick a live era.
+  const openEra =
+    typeof input.openEra === 'string' && ERA_IDS.has(input.openEra) ? input.openEra : null;
+
+  return {
+    mode,
+    watched,
+    open: [...new Set(open)],
+    openEra,
+    hideLogged: input.hideLogged === true,
+  };
 }
 
 /**
@@ -130,6 +152,8 @@ export function flush(): void {
         mode: snapshot.mode,
         watched: snapshot.watched,
         open: snapshot.open,
+        openEra: snapshot.openEra,
+        hideLogged: snapshot.hideLogged,
       }),
     );
   } catch {

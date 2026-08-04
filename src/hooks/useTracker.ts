@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CATALOG } from '../data/catalog';
 import type { Entry, Mode } from '../data/types';
-import type { WatchedState } from '../lib/progress';
+import { eraToAutoOpen, type WatchedState } from '../lib/progress';
 import { flush, load, save, type TrackerState } from '../lib/storage';
 import { mergeStates } from '../lib/transfer';
 
@@ -14,6 +15,13 @@ export interface Tracker {
   toggleEntry: (entry: Entry) => void;
   toggleEpisode: (entry: Entry, index: number) => void;
   toggleOpen: (entry: Entry) => void;
+  /** Id of the expanded era, or null. Only one is open at a time. */
+  openEra: string | null;
+  hideLogged: boolean;
+  /** Open an era, or pass the open era's id to collapse it. */
+  setOpenEra: (eraId: string | null) => void;
+  toggleHideLogged: () => void;
+  collapseAll: () => void;
   /** Wipe all progress. Keeps the selected mode. */
   purge: () => void;
   /** Fold an imported log into the current one. */
@@ -29,8 +37,19 @@ export interface Tracker {
  * the logged state immediately rather than flashing an empty tracker and then
  * filling in.
  */
+/**
+ * Restore state, expanding the era with unfinished business when storage did
+ * not carry one. Done at hydration rather than in an effect so the first paint
+ * already shows the right era open.
+ */
+function hydrate(): TrackerState {
+  const restored = load();
+  if (restored.openEra) return restored;
+  return { ...restored, openEra: eraToAutoOpen(CATALOG, restored.watched, restored.mode) };
+}
+
 export function useTracker(): Tracker {
-  const [state, setState] = useState<TrackerState>(load);
+  const [state, setState] = useState<TrackerState>(hydrate);
 
   const update = useCallback((updater: (prev: TrackerState) => TrackerState) => {
     setState((prev) => {
@@ -111,8 +130,26 @@ export function useTracker(): Tracker {
     [update],
   );
 
+  const setOpenEra = useCallback(
+    (eraId: string | null) =>
+      // Opening one era closes whichever was open — the accordion holds a
+      // single id rather than a set.
+      update((prev) => ({ ...prev, openEra: prev.openEra === eraId ? null : eraId })),
+    [update],
+  );
+
+  const toggleHideLogged = useCallback(
+    () => update((prev) => ({ ...prev, hideLogged: !prev.hideLogged })),
+    [update],
+  );
+
+  const collapseAll = useCallback(
+    () => update((prev) => ({ ...prev, openEra: null, open: [] })),
+    [update],
+  );
+
   const purge = useCallback(
-    () => update((prev) => ({ mode: prev.mode, watched: {}, open: [] })),
+    () => update((prev) => ({ ...prev, watched: {}, open: [] })),
     [update],
   );
 
@@ -131,6 +168,11 @@ export function useTracker(): Tracker {
     toggleEntry,
     toggleEpisode,
     toggleOpen,
+    openEra: state.openEra,
+    hideLogged: state.hideLogged,
+    setOpenEra,
+    toggleHideLogged,
+    collapseAll,
     purge,
     merge,
     snapshot: state,

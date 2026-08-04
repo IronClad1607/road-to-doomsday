@@ -93,5 +93,9 @@ export function mergeStates(current: TrackerState, incoming: TrackerState): Trac
     mode: incoming.mode,
     watched,
     open: [...new Set([...current.open, ...incoming.open])],
+    // View state is local to this browser, not part of the log — importing
+    // someone's backup should not yank the accordion open somewhere else.
+    openEra: current.openEra,
+    hideLogged: current.hideLogged,
   };
 }
