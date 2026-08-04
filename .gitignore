@@ -4,3 +4,8 @@ dist/
 .DS_Store
 *.local
 .vite/
+
+# Local secrets. .env.example documents the shape.
+.env
+.env.local
+.env.*.local
