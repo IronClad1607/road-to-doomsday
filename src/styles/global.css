@@ -22,7 +22,18 @@
   --content-width: 560px;
   --content-pad: 14px;
   /* Minimum comfortable touch target for the check-off controls. */
-  --tap: 34px;
+  --tap: 36px;
+
+  /*
+   * Type scale. The design leans on small, heavily letter-spaced uppercase
+   * mono, which reads as texture at a glance but stops being legible below
+   * about 10px on a phone — so that is the floor, and body copy sits well
+   * above it.
+   */
+  --fs-micro: 10px;
+  --fs-label: 11px;
+  --fs-meta: 12px;
+  --fs-body: 13px;
 
   color-scheme: dark;
 }

@@ -48,7 +48,7 @@
 .glyph {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 20px;
+  font-size: 22px;
   line-height: 0.86;
   letter-spacing: -0.02em;
   text-align: center;
@@ -60,7 +60,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  font-size: 6px;
+  font-size: var(--fs-micro);
   letter-spacing: 0.12em;
   text-align: center;
   padding: 2px;
@@ -81,7 +81,7 @@
   flex-wrap: wrap;
   gap: 4px;
   align-items: center;
-  font-size: 7px;
+  font-size: var(--fs-micro);
   letter-spacing: 0.12em;
 }
 
@@ -112,7 +112,7 @@
 .title {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(17px, 4.6vw, 21px);
+  font-size: clamp(19px, 5.2vw, 24px);
   line-height: 0.96;
   text-transform: uppercase;
   color: var(--era-ink);
@@ -120,7 +120,7 @@
 }
 
 .clue {
-  font-size: 9px;
+  font-size: var(--fs-meta);
   line-height: 1.45;
   color: var(--era-sub);
   margin: 0;
@@ -143,7 +143,7 @@
 .service,
 .episodes {
   min-height: var(--tap);
-  font-size: 8px;
+  font-size: var(--fs-label);
   letter-spacing: 0.14em;
   border: 1px solid var(--era-border);
 }

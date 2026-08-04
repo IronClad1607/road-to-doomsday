@@ -5,7 +5,7 @@
 }
 
 .heading {
-  font-size: 9px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.2em;
   color: var(--shell-muted);
   margin-bottom: 8px;
@@ -23,7 +23,7 @@
   padding: 0 12px;
   border: 1px solid var(--shell-line);
   color: var(--shell-muted);
-  font-size: 9px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.16em;
   transition: color 0.2s, border-color 0.2s;
 }
@@ -34,7 +34,7 @@
 }
 
 .status {
-  font-size: 9px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.14em;
   color: var(--green);
   margin-top: 8px;
@@ -46,7 +46,7 @@
 }
 
 .note {
-  font-size: 9px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.12em;
   color: var(--shell-dim);
   line-height: 1.8;

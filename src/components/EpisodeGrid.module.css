@@ -3,7 +3,7 @@
   border-top: 1px dashed var(--era-border);
   padding-top: 8px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
   gap: 4px;
 }
 
@@ -13,7 +13,7 @@
   align-items: center;
   min-height: var(--tap);
   padding: 0 7px;
-  font-size: 8px;
+  font-size: var(--fs-label);
   letter-spacing: 0.06em;
   text-align: left;
   border: 1px solid var(--era-border);

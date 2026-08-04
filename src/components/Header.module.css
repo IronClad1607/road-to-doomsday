@@ -1,13 +1,18 @@
+/*
+ * Two long letter-spaced strings on one line — at the larger type this only
+ * fits a narrow phone with the tracking pulled back in.
+ */
 .protocol {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
   padding: 10px 0 8px;
-  font-size: 8px;
-  letter-spacing: 0.2em;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.12em;
   color: var(--shell-muted);
   border-bottom: 1px solid var(--shell-line);
+  white-space: nowrap;
 }
 
 .masthead {
@@ -47,7 +52,7 @@
 
 .showtime {
   margin-top: 8px;
-  font-size: 8px;
+  font-size: var(--fs-label);
   letter-spacing: 0.16em;
   color: var(--gold);
 }
@@ -69,7 +74,7 @@
 }
 
 .daysUnit {
-  font-size: 8px;
+  font-size: var(--fs-label);
   letter-spacing: 0.2em;
   color: var(--shell-muted);
   margin-top: 2px;
@@ -77,7 +82,7 @@
 
 .clock {
   margin-top: 6px;
-  font-size: 11px;
+  font-size: var(--fs-body);
   letter-spacing: 0.1em;
   color: var(--gold);
   font-variant-numeric: tabular-nums;

@@ -2,7 +2,7 @@
   margin-top: 26px;
   padding-top: 14px;
   border-top: 1px solid var(--shell-line);
-  font-size: 9px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.14em;
   color: var(--shell-dim);
   line-height: 1.8;

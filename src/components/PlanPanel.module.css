@@ -31,20 +31,20 @@
 .modeLabel {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
   letter-spacing: 0.02em;
 }
 
 .modeHours {
-  font-size: 7px;
+  font-size: var(--fs-micro);
   letter-spacing: 0.14em;
   margin-top: 4px;
   opacity: 0.75;
 }
 
 .description {
-  font-size: 8px;
+  font-size: var(--fs-label);
   letter-spacing: 0.12em;
   color: var(--shell-muted);
   margin: 7px 0 0;
@@ -58,13 +58,13 @@
   margin-top: 10px;
   padding-top: 9px;
   border-top: 1px dashed #2a231d;
-  font-size: 8px;
+  font-size: var(--fs-label);
   letter-spacing: 0.12em;
   color: var(--shell-muted);
 }
 
 .ladderHeading {
-  font-size: 8px;
+  font-size: var(--fs-label);
   letter-spacing: 0.18em;
   color: var(--shell-muted);
   margin: 10px 0 6px;
@@ -83,7 +83,7 @@
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  font-size: 8px;
+  font-size: var(--fs-label);
   letter-spacing: 0.14em;
   padding: 4px 6px;
   border: 1px solid #1e1a16;
@@ -118,7 +118,7 @@
   padding: 0 10px;
   border: 1px solid var(--shell-line);
   color: var(--shell-muted);
-  font-size: 8px;
+  font-size: var(--fs-label);
   letter-spacing: 0.14em;
   transition: color 0.2s, border-color 0.2s;
 }
