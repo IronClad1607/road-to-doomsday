@@ -1,0 +1,18 @@
+.button {
+  position: fixed;
+  right: 12px;
+  /* Clear of the iOS home indicator and any browser chrome. */
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  z-index: 30;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--gold);
+  background: rgba(16, 13, 11, 0.92);
+  color: var(--shell-ink);
+  font-size: 13px;
+  backdrop-filter: blur(4px);
+  transition: opacity 0.25s ease;
+}

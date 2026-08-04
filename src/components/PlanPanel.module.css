@@ -1,0 +1,141 @@
+.panel {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 12px var(--content-pad) 14px;
+  border-bottom: 1px solid var(--shell-line);
+  background: var(--shell-panel);
+}
+
+.modes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.mode {
+  min-height: 48px;
+  padding: 7px 5px;
+  text-align: left;
+  border: 1px solid var(--shell-line);
+  background: var(--shell-bg);
+  color: var(--shell-muted);
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.modeSelected {
+  border-color: var(--gold);
+  background: linear-gradient(160deg, #1b2a1f, #12100d);
+  color: var(--shell-ink);
+}
+
+.modeLabel {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.modeHours {
+  font-size: 7px;
+  letter-spacing: 0.14em;
+  margin-top: 4px;
+  opacity: 0.75;
+}
+
+.description {
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--shell-muted);
+  margin: 7px 0 0;
+  line-height: 1.6;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px dashed #2a231d;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--shell-muted);
+}
+
+.ladderHeading {
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: var(--shell-muted);
+  margin: 10px 0 6px;
+}
+
+.ranks {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rank {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  padding: 4px 6px;
+  border: 1px solid #1e1a16;
+  color: var(--shell-dim);
+}
+
+/* Earned, but outranked. */
+.rankEarned {
+  color: var(--shell-ink);
+}
+
+.rankCurrent {
+  border-color: var(--gold);
+  background: linear-gradient(90deg, #1b2a1f, #12100d);
+}
+
+.rankAt {
+  opacity: 0.6;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 11px;
+  padding-top: 10px;
+  border-top: 1px dashed #2a231d;
+}
+
+.control {
+  min-height: var(--tap);
+  padding: 0 10px;
+  border: 1px solid var(--shell-line);
+  color: var(--shell-muted);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.control:hover {
+  color: var(--shell-ink);
+  border-color: var(--gold);
+}
+
+.controlOn {
+  color: var(--shell-ink);
+  border-color: var(--gold);
+  background: linear-gradient(160deg, #1b2a1f, #12100d);
+}
+
+/* Armed state: one more click wipes everything, so it stops being quiet. */
+.controlArmed {
+  color: #d9a15c;
+  border-color: var(--gold);
+}
