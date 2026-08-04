@@ -1,0 +1,54 @@
+.archive {
+  margin-top: 26px;
+  padding-top: 14px;
+  border-top: 1px solid var(--shell-line);
+}
+
+.heading {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--shell-muted);
+  margin-bottom: 8px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.button {
+  min-height: var(--tap);
+  padding: 0 12px;
+  border: 1px solid var(--shell-line);
+  color: var(--shell-muted);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.button:hover {
+  color: var(--shell-ink);
+  border-color: var(--gold);
+}
+
+.status {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--green);
+  margin-top: 8px;
+  min-height: 1.2em;
+}
+
+.statusError {
+  color: #d9a15c;
+}
+
+.note {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--shell-dim);
+  line-height: 1.8;
+  margin: 8px 0 0;
+}

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Archive } from './components/Archive';
 import { EraSection } from './components/EraSection';
 import { Finale } from './components/Finale';
 import { Footer } from './components/Footer';
@@ -44,6 +45,7 @@ export function App() {
 
       <div className={styles.outro}>
         <Finale pct={readiness.pct} />
+        <Archive state={tracker.snapshot} onImport={tracker.merge} />
         <Footer rank={readiness.rank} />
       </div>
     </div>
