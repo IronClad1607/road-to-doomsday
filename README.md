@@ -17,6 +17,12 @@ Pick how deep you're going, check things off, and watch the readiness meter fill
   recommended, ~156h), `EVERYTHING` (full canon including one-shots, Netflix, S.H.I.E.L.D.,
   animation and the Fox rail, ~352h). Entries outside your plan stay visible but dim, and
   readiness rescales to whatever you picked rather than punishing you for opting out.
+- **Accordion timeline** — one era open at a time, so the page stays short. On load it opens
+  the first era that still has something unwatched in your plan, not simply the first era.
+- **Sticky bar and era rail** — readiness stays pinned at any scroll depth, and a scrollable
+  chip rail jumps straight to any era. Eras with nothing in your plan are dropped entirely.
+- **Next up** — a card naming the single next unwatched entry, since with everything
+  collapsed the obvious question is "what now?".
 - **Episode-level tracking** — series expand to individual episodes, with real titles where
   the catalog has them, so partial progress is never lost.
 - **Readiness and pace** — percentage complete, hours logged against hours required, and the
@@ -55,10 +61,11 @@ src/
   lib/         progress.ts — readiness/rank/pace maths (pure)
                storage.ts  — validated, debounced localStorage persistence
                transfer.ts — JSON export, import parsing, merge
+               scroll.ts   — resolves the real scroller; 96px jump offset
   hooks/       useTracker  — watch state, hydrated from and written to storage
                useCountdown — the 1s tick, isolated so cards don't re-render
-  components/  Header, ModeSelector, Readiness, EraSection, EntryCard,
-               EpisodeGrid, Finale, Archive, Footer
+  components/  Header, StatusBar, PlanPanel, NextUp, EraSection, EntryCard,
+               EpisodeGrid, Finale, Archive, Footer, BackToTop
   styles/      global.css — shell tokens; eraVars.ts — per-era CSS custom properties
 ```
 
@@ -78,6 +85,12 @@ A few things worth knowing:
 - **Re-render scope is deliberate.** The countdown owns its own tick, and each card is
   memoised on its own slice of watch state, so a second passing doesn't redraw 90 cards and
   checking one entry doesn't either.
+- **Only `html` clips horizontally.** Putting `overflow-x: hidden` on a wrapper div makes
+  that div the scroll container and silently disables `position: sticky` inside it; putting
+  it on `body` makes the body the scroller and turns document-level `scrollTo`/`scrollTop`
+  into no-ops. Both fail invisibly, so `lib/scroll.ts` also resolves the real scroller by
+  measurement rather than assuming one — and jumps use it instead of `scrollIntoView`, which
+  picks its own container and lands targets under the sticky bar.
 
 ## Deployment
 
