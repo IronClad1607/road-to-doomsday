@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Entry, Mode } from '../data/types';
 import type { WatchedState } from '../lib/progress';
 import { flush, load, save, type TrackerState } from '../lib/storage';
+import { mergeStates } from '../lib/transfer';
 
 export interface Tracker {
   mode: Mode;
@@ -15,6 +16,10 @@ export interface Tracker {
   toggleOpen: (entry: Entry) => void;
   /** Wipe all progress. Keeps the selected mode. */
   purge: () => void;
+  /** Fold an imported log into the current one. */
+  merge: (incoming: TrackerState) => void;
+  /** Current state, for export. */
+  snapshot: TrackerState;
 }
 
 /**
@@ -111,6 +116,11 @@ export function useTracker(): Tracker {
     [update],
   );
 
+  const merge = useCallback(
+    (incoming: TrackerState) => update((prev) => mergeStates(prev, incoming)),
+    [update],
+  );
+
   const open = useMemo(() => new Set(state.open), [state.open]);
 
   return {
@@ -122,5 +132,7 @@ export function useTracker(): Tracker {
     toggleEpisode,
     toggleOpen,
     purge,
+    merge,
+    snapshot: state,
   };
 }

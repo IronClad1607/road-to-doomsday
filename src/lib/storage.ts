@@ -37,15 +37,18 @@ function isMode(value: unknown): value is Mode {
 }
 
 /**
- * Rebuild trusted state from whatever was in storage.
+ * Rebuild trusted state from an untrusted payload.
  *
- * Stored progress can outlive the catalog that produced it — entries get
- * added, renamed or retired between visits — so every id is re-checked and
- * every episode index re-bounded here. Anything unrecognised is dropped
- * rather than carried forward, which keeps a stale write from corrupting the
- * readiness maths.
+ * Progress can outlive the catalog that produced it — entries get added,
+ * renamed or retired between visits — so every id is re-checked and every
+ * episode index re-bounded here. Anything unrecognised is dropped rather than
+ * carried forward, which keeps a stale write from corrupting the readiness
+ * maths.
+ *
+ * Shared with the import path, where the payload is a user-supplied file and
+ * so even less trustworthy than a value this app wrote itself.
  */
-function sanitise(raw: unknown): TrackerState {
+export function sanitiseState(raw: unknown): TrackerState {
   if (typeof raw !== 'object' || raw === null) return DEFAULT_STATE;
   const input = raw as Record<string, unknown>;
 
@@ -100,7 +103,7 @@ export function load(): TrackerState {
   if (!stored) return DEFAULT_STATE;
 
   try {
-    return sanitise(JSON.parse(stored));
+    return sanitiseState(JSON.parse(stored));
   } catch {
     return DEFAULT_STATE;
   }
