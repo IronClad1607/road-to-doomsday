@@ -29,7 +29,8 @@ Pick how deep you're going, check things off, and watch the readiness meter fill
   hours-per-week you need to sustain to finish before release.
 - **Clearance ladder** — six ranks from `CIVILIAN BYSTANDER` to `WORTHY`.
 - **A finale panel** sealed until your plan hits 100%.
-- **Progress persists** in the browser, and survives reloads.
+- **Progress persists** in the browser, and survives reloads. With Supabase configured, it
+  also syncs across devices behind an email magic link.
 - **Export and import** your log as a JSON file, to back it up or move it to another
   browser or machine. Import *merges* — watched stays watched and episode lists union, so a
   restore can never delete progress you made since the export.
@@ -62,10 +63,13 @@ src/
                storage.ts  — validated, debounced localStorage persistence
                transfer.ts — JSON export, import parsing, merge
                scroll.ts   — resolves the real scroller; 96px jump offset
-  hooks/       useTracker  — watch state, hydrated from and written to storage
+               supabase.ts, remoteCatalog.ts, remoteProgress.ts — optional sync
+  hooks/       useTracker  — watch state; storage, plus Supabase when signed in
+               useAuth     — Supabase session; 'disabled' when unconfigured
                useCountdown — the 1s tick, isolated so cards don't re-render
   components/  Header, StatusBar, PlanPanel, NextUp, EraSection, EntryCard,
-               EpisodeGrid, Finale, Archive, Footer, BackToTop
+               EpisodeGrid, Finale, Archive, AccountControls, Footer, BackToTop
+  supabase/    migrations/ — schema and RLS; seed/ — generated catalog
   styles/      global.css — shell tokens; eraVars.ts — per-era CSS custom properties
 ```
 
@@ -92,15 +96,41 @@ A few things worth knowing:
   measurement rather than assuming one — and jumps use it instead of `scrollIntoView`, which
   picks its own container and lands targets under the sticky bar.
 
+## Supabase (optional)
+
+The app runs fully local with no configuration. Adding Supabase credentials turns on two
+things: the catalog is read from a table (falling back to the bundled copy on any failure),
+and progress syncs across devices behind a magic-link sign-in.
+
+**Setup**
+
+1. In the Supabase SQL editor, run [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql),
+   then [`supabase/seed/catalog.sql`](supabase/seed/catalog.sql). The seed must run there
+   rather than from the app — the catalog tables have no write policy.
+2. Auth → Providers: enable **Email**. Auth → URL Configuration: add your redirect URLs
+   (`http://localhost:5173` and the deployed URL).
+3. Locally: `cp .env.example .env.local` and fill in the two values.
+4. For deploys: add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as repository secrets
+   (Settings → Secrets and variables → Actions).
+
+**On the anon key.** It is compiled into the browser bundle — unavoidable for a static site,
+and expected: it is a *publishable* key. Row Level Security is what actually protects data, so
+the policies in the migration are load-bearing rather than decorative. Never put the
+`service_role` key in `.env` — it bypasses RLS entirely.
+
+**Re-seeding.** Edit the prototype, run `node scripts/generate-catalog.mjs` (which rewrites
+both `src/data/catalog.ts` and the seed), then re-run the seed SQL. Removing an entry from the
+catalog cascades to anyone's progress against it, which is what removing it means.
+
 ## Deployment
 
 Pushing to `main` builds and publishes to GitHub Pages via
 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). The build typechecks first, so
 a type error fails the deploy rather than shipping.
 
-There is no backend — progress is per-browser and never leaves your machine except through
-an export you trigger yourself. That also means no cross-device sync: use the archive
-controls to move a log between devices.
+Without Supabase credentials there is no backend at all: progress is per-browser and never
+leaves your machine except through an export you trigger. With them, progress syncs to your
+account and localStorage becomes an offline cache.
 
 ## `design/`
 
