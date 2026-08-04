@@ -139,3 +139,57 @@
   color: #d9a15c;
   border-color: var(--gold);
 }
+
+.control:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.account {
+  margin-top: 11px;
+  padding-top: 10px;
+  border-top: 1px dashed #2a231d;
+}
+
+.accountRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.accountInput {
+  flex: 1;
+  min-width: 150px;
+  min-height: var(--tap);
+  padding: 0 10px;
+  border: 1px solid var(--shell-line);
+  background: var(--shell-bg);
+  color: var(--shell-ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+}
+
+.accountInput::placeholder {
+  color: var(--shell-dim);
+}
+
+.accountEmail {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  color: var(--green);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accountNote {
+  font-size: var(--fs-micro);
+  letter-spacing: 0.12em;
+  color: var(--shell-dim);
+  line-height: 1.7;
+  margin: 7px 0 0;
+}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CATALOG } from '../data/catalog';
-import type { Mode } from '../data/types';
+import type { Era, Mode } from '../data/types';
+import type { Auth } from '../hooks/useAuth';
 import { DOOMSDAY_AT } from '../hooks/useCountdown';
 import {
   MODES,
@@ -9,6 +9,7 @@ import {
   paceLabel,
   type Readiness as ReadinessData,
 } from '../lib/progress';
+import { AccountControls } from './AccountControls';
 import styles from './PlanPanel.module.css';
 
 /** How long the purge button stays armed before disarming itself. */
@@ -18,6 +19,9 @@ interface PlanPanelProps {
   mode: Mode;
   readiness: ReadinessData;
   hideLogged: boolean;
+  auth: Auth;
+  syncing: boolean;
+  catalog: readonly Era[];
   onSelectMode: (mode: Mode) => void;
   onToggleHideLogged: () => void;
   onCollapseAll: () => void;
@@ -33,6 +37,9 @@ export function PlanPanel({
   mode,
   readiness,
   hideLogged,
+  auth,
+  syncing,
+  catalog,
   onSelectMode,
   onToggleHideLogged,
   onCollapseAll,
@@ -48,9 +55,11 @@ export function PlanPanel({
     return () => clearTimeout(timer);
   }, [armed]);
 
+  // Recomputed when the catalog changes, since a remote catalog can differ
+  // from the one that shipped in the bundle.
   const hours = useMemo(
-    () => new Map(MODES.map((meta) => [meta.id, hoursForMode(CATALOG, meta.id)])),
-    [],
+    () => new Map(MODES.map((meta) => [meta.id, hoursForMode(catalog, meta.id)])),
+    [catalog],
   );
 
   const active = MODES.find((meta) => meta.id === mode) ?? MODES[1];
@@ -141,6 +150,8 @@ export function PlanPanel({
           {armed ? 'CONFIRM PURGE' : 'PURGE PROGRESS'}
         </button>
       </div>
+
+      <AccountControls auth={auth} syncing={syncing} />
     </div>
   );
 }

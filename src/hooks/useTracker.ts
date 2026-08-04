@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CATALOG } from '../data/catalog';
 import type { Entry, Mode } from '../data/types';
 import { eraToAutoOpen, type WatchedState } from '../lib/progress';
+import { fetchRemoteState, pushRemoteState, reconcile } from '../lib/remoteProgress';
 import { flush, load, save, type TrackerState } from '../lib/storage';
 import { mergeStates } from '../lib/transfer';
 
@@ -28,6 +29,8 @@ export interface Tracker {
   merge: (incoming: TrackerState) => void;
   /** Current state, for export. */
   snapshot: TrackerState;
+  /** True while the account's log is being reconciled with this browser's. */
+  syncing: boolean;
 }
 
 /**
@@ -48,16 +51,60 @@ function hydrate(): TrackerState {
   return { ...restored, openEra: eraToAutoOpen(CATALOG, restored.watched, restored.mode) };
 }
 
-export function useTracker(): Tracker {
+export function useTracker(userId: string | null): Tracker {
   const [state, setState] = useState<TrackerState>(hydrate);
+  const [syncing, setSyncing] = useState(false);
+  // Which account the current state belongs to, so a sign-out does not push
+  // one user's log into another's account.
+  const ownerRef = useRef<string | null>(null);
 
-  const update = useCallback((updater: (prev: TrackerState) => TrackerState) => {
-    setState((prev) => {
-      const next = updater(prev);
-      save(next);
-      return next;
-    });
-  }, []);
+  const update = useCallback(
+    (updater: (prev: TrackerState) => TrackerState) => {
+      setState((prev) => {
+        const next = updater(prev);
+        // localStorage stays the offline cache even when signed in — a dropped
+        // connection should cost you nothing.
+        save(next);
+        if (ownerRef.current) void pushRemoteState(ownerRef.current, next);
+        return next;
+      });
+    },
+    [],
+  );
+
+  // On sign-in, fold the account's log together with whatever this browser
+  // already had, then push the union back. On sign-out, just stop syncing —
+  // the local copy is left exactly as it is.
+  useEffect(() => {
+    if (!userId) {
+      ownerRef.current = null;
+      return;
+    }
+    let cancelled = false;
+    setSyncing(true);
+
+    void (async () => {
+      const remote = await fetchRemoteState(userId);
+      if (cancelled) return;
+
+      if (remote) {
+        setState((prev) => {
+          const merged = reconcile(prev, remote);
+          save(merged);
+          void pushRemoteState(userId, merged);
+          return merged;
+        });
+      }
+      // A failed read means the network is down, not that the account is
+      // empty — so nothing is pushed, and local progress is left untouched.
+      ownerRef.current = remote ? userId : null;
+      setSyncing(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   // Writes are debounced, so force any queued one out before the page goes
   // away. pagehide covers navigation and tab close; visibilitychange covers
@@ -176,5 +223,6 @@ export function useTracker(): Tracker {
     purge,
     merge,
     snapshot: state,
+    syncing,
   };
 }
