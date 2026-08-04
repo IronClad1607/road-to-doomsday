@@ -1,7 +1,7 @@
 .card {
   background: var(--era-card);
   border: 1px solid var(--era-border);
-  border-left: 4px solid transparent;
+  border-left: 3px solid transparent;
   transition: opacity 0.3s, border-color 0.3s;
 }
 
@@ -20,15 +20,15 @@
 
 .inner {
   display: flex;
-  gap: 12px;
-  padding: 10px;
+  gap: 9px;
+  padding: 7px;
 }
 
 .poster {
   position: relative;
-  flex: 0 0 78px;
-  width: 78px;
-  height: 104px;
+  flex: 0 0 60px;
+  width: 60px;
+  height: 82px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,11 +48,11 @@
 .glyph {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 26px;
+  font-size: 20px;
   line-height: 0.86;
   letter-spacing: -0.02em;
   text-align: center;
-  padding: 4px;
+  padding: 3px;
 }
 
 .kind {
@@ -60,10 +60,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  font-size: 7px;
-  letter-spacing: 0.14em;
+  font-size: 6px;
+  letter-spacing: 0.12em;
   text-align: center;
-  padding: 3px 2px;
+  padding: 2px;
   background: rgba(0, 0, 0, 0.55);
   color: #efe6d6;
 }
@@ -73,22 +73,22 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 4px;
   align-items: center;
-  font-size: 8px;
-  letter-spacing: 0.14em;
+  font-size: 7px;
+  letter-spacing: 0.12em;
 }
 
 .year {
   border: 1px solid var(--era-border);
   color: var(--era-accent);
-  padding: 2px 5px;
+  padding: 1px 4px;
 }
 
 .runtime {
@@ -98,30 +98,30 @@
 .stingers {
   background: var(--era-accent);
   color: #0b0908;
-  padding: 2px 5px;
+  padding: 1px 4px;
   font-weight: 600;
 }
 
 .drop {
   border: 1px dashed var(--gold);
   color: #d9a15c;
-  padding: 2px 5px;
+  padding: 1px 4px;
   animation: rtdBreathe 3s ease-in-out infinite;
 }
 
 .title {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(21px, 5.6vw, 27px);
-  line-height: 0.94;
+  font-size: clamp(17px, 4.6vw, 21px);
+  line-height: 0.96;
   text-transform: uppercase;
   color: var(--era-ink);
   margin: 0;
 }
 
 .clue {
-  font-size: 10px;
-  line-height: 1.55;
+  font-size: 9px;
+  line-height: 1.45;
   color: var(--era-sub);
   margin: 0;
 }
@@ -135,19 +135,24 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  margin-top: 2px;
+  gap: 4px;
+  margin-top: 1px;
+}
+
+.check,
+.service,
+.episodes {
+  min-height: var(--tap);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  border: 1px solid var(--era-border);
 }
 
 .check {
   min-width: var(--tap);
-  min-height: var(--tap);
-  padding: 0 12px;
-  border: 1px solid var(--era-border);
+  padding: 0 9px;
   background: transparent;
   color: var(--era-sub);
-  font-size: 9px;
-  letter-spacing: 0.16em;
   font-weight: 600;
   transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
@@ -158,22 +163,14 @@
   color: #0b0908;
 }
 
-.episodes {
-  min-height: var(--tap);
-  padding: 0 10px;
-  border: 1px solid var(--era-border);
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  color: var(--era-accent);
-}
-
 .service {
-  min-height: var(--tap);
   display: inline-flex;
   align-items: center;
-  padding: 0 10px;
-  border: 1px solid var(--era-border);
-  font-size: 9px;
-  letter-spacing: 0.16em;
+  padding: 0 8px;
   color: var(--era-ink);
+}
+
+.episodes {
+  padding: 0 8px;
+  color: var(--era-accent);
 }

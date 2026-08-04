@@ -116,7 +116,7 @@ export const EntryCard = memo(function EntryCard({
                 onClick={() => onToggleOpen(entry)}
                 className={styles.episodes}
               >
-                EPISODES {episodeCount}/{entry.episodes.length} {open ? '▴' : '▾'}
+                EP {episodeCount}/{entry.episodes.length} {open ? '▴' : '▾'}
               </button>
             )}
           </div>

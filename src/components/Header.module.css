@@ -3,42 +3,35 @@
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  padding: 14px 0 10px;
-  font-size: 9px;
-  letter-spacing: 0.22em;
+  padding: 10px 0 8px;
+  font-size: 8px;
+  letter-spacing: 0.2em;
   color: var(--shell-muted);
   border-bottom: 1px solid var(--shell-line);
-}
-
-.purge {
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  color: var(--shell-muted);
-  border: 1px solid var(--shell-line);
-  padding: 6px 8px;
-  white-space: nowrap;
-  transition: color 0.2s, border-color 0.2s;
-}
-
-/* Armed state: one more click wipes everything, so it stops being quiet. */
-.purgeArmed {
-  color: #d9a15c;
-  border-color: var(--gold);
 }
 
 .masthead {
   position: relative;
-  padding: 26px 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0 12px;
   border-bottom: 1px solid var(--shell-line);
   background: radial-gradient(120% 90% at 50% 0%, rgba(31, 61, 43, 0.55), transparent 70%);
+}
+
+.lockup {
+  min-width: 0;
 }
 
 .title {
   font-family: var(--font-display);
   font-weight: 900;
-  line-height: 0.82;
+  line-height: 0.8;
   letter-spacing: -0.01em;
-  font-size: clamp(56px, 17vw, 104px);
+  /* Roughly half the v1 lockup — it shares the row with the countdown now. */
+  font-size: clamp(30px, 9vw, 52px);
   color: var(--shell-ink);
   text-transform: uppercase;
   margin: 0;
@@ -49,46 +42,43 @@
   letter-spacing: normal;
   color: var(--green);
   -webkit-text-stroke: 1px var(--gold);
-  text-shadow: 0 0 34px rgba(47, 107, 69, 0.55);
+  text-shadow: 0 0 24px rgba(47, 107, 69, 0.55);
 }
 
 .showtime {
-  margin-top: 12px;
-  font-size: 10px;
-  letter-spacing: 0.2em;
+  margin-top: 8px;
+  font-size: 8px;
+  letter-spacing: 0.16em;
   color: var(--gold);
 }
 
 .countdown {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-top: 16px;
+  flex: 0 0 auto;
+  text-align: right;
+  border-left: 1px solid #2b3a2f;
+  padding-left: 12px;
 }
 
-.cell {
-  border: 1px solid #2b3a2f;
-  background: #0f130f;
-  padding: 10px 4px;
-  text-align: center;
-}
-
-.value {
+.days {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 34px;
-  line-height: 1;
+  font-weight: 900;
+  font-size: clamp(44px, 13vw, 66px);
+  line-height: 0.86;
   color: var(--shell-ink);
   font-variant-numeric: tabular-nums;
 }
 
-.seconds {
-  color: var(--gold);
-}
-
-.unit {
+.daysUnit {
   font-size: 8px;
   letter-spacing: 0.2em;
   color: var(--shell-muted);
-  margin-top: 4px;
+  margin-top: 2px;
+}
+
+.clock {
+  margin-top: 6px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
 }
