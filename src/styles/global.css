@@ -31,6 +31,18 @@
   box-sizing: border-box;
 }
 
+/*
+ * The horizontal clip belongs here and nowhere else.
+ *
+ * On a wrapper div it makes that div the scroll container, so `position: sticky`
+ * silently stops working. On `body` it makes the body the scroller, so
+ * `window.scrollTo` / `scrollTop` become no-ops and every jump fails quietly.
+ * Both are invisible in review and obvious only at runtime.
+ */
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   background: var(--shell-bg);

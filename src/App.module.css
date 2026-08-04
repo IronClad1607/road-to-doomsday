@@ -1,8 +1,13 @@
+/*
+ * No `overflow-x` here. Clipping on this wrapper would make it the scroll
+ * container, which stops the sticky bar's scrollport from ever scrolling and
+ * silently disables `position: sticky`. The horizontal clip lives on `html`
+ * instead — see styles/global.css.
+ */
 .shell {
   min-height: 100vh;
   background: var(--shell-bg);
   padding-bottom: 80px;
-  overflow-x: hidden;
 }
 
 /* The centred column everything outside the full-bleed era sections sits in. */
