@@ -1,5 +1,7 @@
 # Road to Doomsday
 
+**→ [ironclad1607.github.io/road-to-doomsday](https://ironclad1607.github.io/road-to-doomsday/)**
+
 An MCU rewatch tracker counting down to *Avengers: Doomsday* — 18 Dec 2026, 09:00 IST.
 
 104 films and series in story order (in-universe chronology, not release order), grouped into
@@ -22,6 +24,9 @@ Pick how deep you're going, check things off, and watch the readiness meter fill
 - **Clearance ladder** — six ranks from `CIVILIAN BYSTANDER` to `WORTHY`.
 - **A finale panel** sealed until your plan hits 100%.
 - **Progress persists** in the browser, and survives reloads.
+- **Export and import** your log as a JSON file, to back it up or move it to another
+  browser or machine. Import *merges* — watched stays watched and episode lists union, so a
+  restore can never delete progress you made since the export.
 
 Each entry also carries a *clue* — the one thing to watch for, and why it's on the road to
 Doomsday.
@@ -49,10 +54,11 @@ src/
   data/        catalog.ts — 13 eras, 104 entries; types.ts — the data model
   lib/         progress.ts — readiness/rank/pace maths (pure)
                storage.ts  — validated, debounced localStorage persistence
+               transfer.ts — JSON export, import parsing, merge
   hooks/       useTracker  — watch state, hydrated from and written to storage
                useCountdown — the 1s tick, isolated so cards don't re-render
   components/  Header, ModeSelector, Readiness, EraSection, EntryCard,
-               EpisodeGrid, Finale, Footer
+               EpisodeGrid, Finale, Archive, Footer
   styles/      global.css — shell tokens; eraVars.ts — per-era CSS custom properties
 ```
 
@@ -65,12 +71,23 @@ A few things worth knowing:
   every entry id is re-checked and every episode index re-bounded on load. Unrecognised keys
   are dropped rather than fed into the readiness maths, and a malformed or unreadable payload
   yields a fresh slate instead of a blank page. Writes are debounced and flushed on
-  `pagehide`/`visibilitychange`.
+  `pagehide`/`visibilitychange`. Imported files go through the same sanitiser — they are
+  user-supplied, so even less trustworthy than something this app wrote itself.
 - **Entries are keyed by short code** (`CA1`, `DPW`) — stable ids, so reordering the catalog
   never remaps someone's saved progress.
 - **Re-render scope is deliberate.** The countdown owns its own tick, and each card is
   memoised on its own slice of watch state, so a second passing doesn't redraw 104 cards and
   checking one entry doesn't either.
+
+## Deployment
+
+Pushing to `main` builds and publishes to GitHub Pages via
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). The build typechecks first, so
+a type error fails the deploy rather than shipping.
+
+There is no backend — progress is per-browser and never leaves your machine except through
+an export you trigger yourself. That also means no cross-device sync: use the archive
+controls to move a log between devices.
 
 ## `design/`
 
