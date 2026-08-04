@@ -33,7 +33,17 @@ jobs:
 
       # `npm run build` typechecks before bundling, so a type error fails the
       # deploy rather than shipping.
+      #
+      # Supabase credentials come from repository secrets. They are compiled
+      # into the bundle and therefore public — which is fine for the anon key,
+      # since Row Level Security is what protects user rows. Using secrets
+      # keeps them out of git history rather than out of the bundle. If the
+      # secrets are unset the build still succeeds and ships the local-only
+      # app, so a fork does not need a Supabase project.
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - uses: actions/configure-pages@v5
 
