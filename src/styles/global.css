@@ -43,15 +43,15 @@
 }
 
 /*
- * The horizontal clip belongs here and nowhere else.
- *
- * On a wrapper div it makes that div the scroll container, so `position: sticky`
- * silently stops working. On `body` it makes the body the scroller, so
- * `window.scrollTo` / `scrollTop` become no-ops and every jump fails quietly.
- * Both are invisible in review and obvious only at runtime.
+ * The route view is a fixed viewport, not a document. Overflow rules live here
+ * and nowhere else — on a wrapper div they make that div the scroll container,
+ * which is what silently broke sticky positioning and scrollTo in the previous
+ * layout. Only the stage body and the rail scroll, and each opts in locally.
  */
-html {
-  overflow-x: hidden;
+html,
+body {
+  height: 100%;
+  overflow: hidden;
 }
 
 body {

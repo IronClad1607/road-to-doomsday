@@ -1,32 +1,29 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Archive } from './components/Archive';
-import { BackToTop } from './components/BackToTop';
-import { EraSection, eraDomId } from './components/EraSection';
-import { Finale } from './components/Finale';
-import { Footer } from './components/Footer';
-import { Header } from './components/Header';
-import { NextUp } from './components/NextUp';
+import { useEffect, useMemo, useState } from 'react';
 import { PlanPanel } from './components/PlanPanel';
-import { StatusBar } from './components/StatusBar';
+import { Rail } from './components/Rail';
+import { RouteHeader } from './components/RouteHeader';
+import { Stage } from './components/Stage';
 import { CATALOG } from './data/catalog';
 import type { Era } from './data/types';
 import { useAuth } from './hooks/useAuth';
 import { useTracker } from './hooks/useTracker';
-import { computeReadiness, erasInMode, nextUnwatched } from './lib/progress';
+import {
+  buildLegs,
+  buildRoute,
+  computeReadiness,
+  nextUnseenIndex,
+  statusOf,
+} from './lib/progress';
 import { loadCatalog } from './lib/remoteCatalog';
-import { scrollToElement } from './lib/scroll';
 import styles from './App.module.css';
 import './styles/global.css';
 
-const NO_PROGRESS = { done: 0, inMode: 0 } as const;
-
 export function App() {
   const auth = useAuth();
-  const tracker = useTracker(auth.userId);
   const [planOpen, setPlanOpen] = useState(false);
 
-  // Starts as the bundled copy so the page paints immediately, then swaps to
-  // the remote catalog if one loads. A failed fetch simply leaves this alone.
+  // Starts as the bundled copy so the first paint is immediate, then swaps to
+  // the remote catalog if one loads. A failed fetch leaves this alone.
   const [catalog, setCatalog] = useState<readonly Era[]>(CATALOG);
 
   useEffect(() => {
@@ -39,97 +36,105 @@ export function App() {
     };
   }, []);
 
+  // The route is derived from the tracker's mode, but the tracker needs the
+  // route length to clamp `idx` — so the length is fed back through state
+  // rather than mirroring the mode in two places.
+  const [routeLength, setRouteLength] = useState(0);
+  const tracker = useTracker(auth.userId, routeLength);
+
+  const route = useMemo(() => buildRoute(catalog, tracker.mode), [catalog, tracker.mode]);
+
+  useEffect(() => {
+    setRouteLength(route.length);
+  }, [route.length]);
+
   const readiness = useMemo(
     () => computeReadiness(catalog, tracker.watched, tracker.mode),
     [catalog, tracker.watched, tracker.mode],
   );
 
-  // An era with nothing in the active plan is dead weight — drop it from the
-  // rail and the body rather than rendering a 0/0 header.
-  const eras = useMemo(() => erasInMode(catalog, tracker.mode), [catalog, tracker.mode]);
+  const legs = useMemo(() => buildLegs(route, tracker.watched), [route, tracker.watched]);
+  const station = route[tracker.idx] ?? null;
 
-  const next = useMemo(
-    () => nextUnwatched(catalog, tracker.watched, tracker.mode),
-    [catalog, tracker.watched, tracker.mode],
+  const logged = useMemo(
+    () =>
+      route.filter((s) => statusOf(s.entry, tracker.watched[s.entry.id]) === 'full').length,
+    [route, tracker.watched],
   );
 
-  const progressFor = useCallback(
-    (eraId: string) => readiness.perEra.get(eraId) ?? NO_PROGRESS,
-    [readiness],
+  const nextUnseen = useMemo(
+    () => nextUnseenIndex(route, tracker.watched, tracker.idx),
+    [route, tracker.watched, tracker.idx],
   );
 
-  /**
-   * Open an era and bring it under the sticky bar. The scroll waits a frame so
-   * it measures the expanded layout rather than the collapsed one.
-   */
-  const jumpToEra = useCallback(
-    (eraId: string) => {
-      if (tracker.openEra !== eraId) tracker.setOpenEra(eraId);
-      requestAnimationFrame(() => {
-        const node = document.getElementById(eraDomId(eraId));
-        if (node) scrollToElement(node);
-      });
-    },
-    [tracker],
-  );
+  const { goTo } = tracker;
+
+  // Arrow keys travel the route; Esc closes the panel. Ignored while typing so
+  // the sign-in field still works.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setPlanOpen(false);
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.isContentEditable)) return;
+      if (planOpen) return;
+      if (event.key === 'ArrowLeft') goTo(tracker.idx - 1);
+      if (event.key === 'ArrowRight') goTo(tracker.idx + 1);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [goTo, tracker.idx, planOpen]);
 
   return (
     <div className={styles.shell}>
-      <div className={styles.rail}>
-        <Header />
-      </div>
-
-      <StatusBar
+      <RouteHeader
+        station={route.length ? tracker.idx + 1 : 0}
+        total={route.length}
+        logged={logged}
         pct={readiness.pct}
-        eras={eras}
-        progressFor={progressFor}
-        openEra={tracker.openEra}
         planOpen={planOpen}
         onTogglePlan={() => setPlanOpen((open) => !open)}
-        onJumpToEra={jumpToEra}
+      />
+
+      <Stage
+        station={station}
+        watched={tracker.watched}
+        anim={tracker.anim}
+        stamped={tracker.stamped}
+        onToggle={tracker.toggleEntry}
+        onToggleEpisode={tracker.toggleEpisode}
+      />
+
+      <Rail
+        legs={legs}
+        route={route}
+        watched={tracker.watched}
+        idx={tracker.idx}
+        mode={tracker.mode}
+        onGoTo={goTo}
       />
 
       {planOpen && (
         <PlanPanel
           mode={tracker.mode}
           readiness={readiness}
-          hideLogged={tracker.hideLogged}
+          catalog={catalog}
           auth={auth}
           syncing={tracker.syncing}
-          catalog={catalog}
+          snapshot={tracker.snapshot}
+          nextUnseen={nextUnseen}
           onSelectMode={tracker.setMode}
-          onToggleHideLogged={tracker.toggleHideLogged}
-          onCollapseAll={tracker.collapseAll}
+          onJumpToNextUnseen={() => {
+            if (nextUnseen >= 0) goTo(nextUnseen);
+            setPlanOpen(false);
+          }}
           onPurge={tracker.purge}
+          onImport={tracker.merge}
+          onClose={() => setPlanOpen(false)}
         />
       )}
-
-      <NextUp next={next} onGo={jumpToEra} onPlanComplete={() => setPlanOpen(true)} />
-
-      {eras.map((era) => (
-        <EraSection
-          key={era.id}
-          era={era}
-          watched={tracker.watched}
-          mode={tracker.mode}
-          progress={progressFor(era.id)}
-          isOpen={tracker.openEra === era.id}
-          open={tracker.open}
-          hideLogged={tracker.hideLogged}
-          onToggleEra={tracker.setOpenEra}
-          onToggleEntry={tracker.toggleEntry}
-          onToggleEpisode={tracker.toggleEpisode}
-          onToggleOpen={tracker.toggleOpen}
-        />
-      ))}
-
-      <div className={styles.outro}>
-        <Finale pct={readiness.pct} />
-        <Archive state={tracker.snapshot} onImport={tracker.merge} />
-        <Footer rank={readiness.rank} />
-      </div>
-
-      <BackToTop />
     </div>
   );
 }

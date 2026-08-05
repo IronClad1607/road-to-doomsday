@@ -1,42 +1,15 @@
 /*
- * No `overflow-x` here. Clipping on this wrapper would make it the scroll
- * container, which stops the sticky bar's scrollport from ever scrolling and
- * silently disables `position: sticky`. The horizontal clip lives on `html`
- * instead — see styles/global.css.
+ * The route shell. A fixed viewport column: header and rail hold their size,
+ * the stage takes the rest. Nothing here scrolls — the stage's inner container
+ * and the rail opt in individually.
+ *
+ * No `overflow-x` on this wrapper. Clipping here would make it the scroll
+ * container, which is what silently broke sticky positioning and scrollTo in
+ * the previous layout. Overflow rules live on html/body only.
  */
 .shell {
-  min-height: 100vh;
-  background: var(--shell-bg);
-  padding-bottom: 80px;
-}
-
-/* The centred column everything outside the full-bleed era sections sits in. */
-.rail {
-  max-width: var(--content-width);
-  margin: 0 auto;
-  padding: 0 var(--content-pad);
-}
-
-.outro {
-  max-width: var(--content-width);
-  margin: 0 auto;
-  padding: 34px var(--content-pad) 0;
-}
-
-.divider {
+  height: 100dvh;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 22px 0 4px;
-  font-size: var(--fs-meta);
-  letter-spacing: 0.22em;
-  color: var(--shell-muted);
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--shell-line);
+  flex-direction: column;
+  background: var(--shell-bg);
 }

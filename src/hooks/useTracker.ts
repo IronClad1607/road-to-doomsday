@@ -1,80 +1,86 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CATALOG } from '../data/catalog';
-import type { Entry, Mode } from '../data/types';
-import { eraToAutoOpen, type WatchedState } from '../lib/progress';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Entry, Mode, Series } from '../data/types';
 import { fetchRemoteState, pushRemoteState, reconcile } from '../lib/remoteProgress';
+import { statusOf, type WatchedState } from '../lib/progress';
 import { flush, load, save, type TrackerState } from '../lib/storage';
 import { mergeStates } from '../lib/transfer';
+
+/**
+ * Advance-on-mark timings. The stamp lands first, holds long enough to read,
+ * then the station slides out and the next slides in.
+ */
+export const STAMP_MS = 500;
+export const HOLD_MS = 820;
+export const SLIDE_OUT_MS = 190;
+export const SLIDE_IN_MS = 280;
+
+export type Anim = 'in' | 'out';
 
 export interface Tracker {
   mode: Mode;
   watched: WatchedState;
-  /** Ids of series whose episode lists are expanded. */
-  open: ReadonlySet<string>;
+  idx: number;
+  anim: Anim;
+  /** Whether the LOGGED stamp is showing on the current station. */
+  stamped: boolean;
   setMode: (mode: Mode) => void;
-  /** Mark an entry watched, or unwatched. Series toggle all-or-nothing. */
+  /** Move to a station directly. Cancels any in-flight advance. */
+  goTo: (index: number) => void;
+  /** Mark an entry watched or unwatched. Completing it advances the route. */
   toggleEntry: (entry: Entry) => void;
-  toggleEpisode: (entry: Entry, index: number) => void;
-  toggleOpen: (entry: Entry) => void;
-  /** Id of the expanded era, or null. Only one is open at a time. */
-  openEra: string | null;
-  hideLogged: boolean;
-  /** Open an era, or pass the open era's id to collapse it. */
-  setOpenEra: (eraId: string | null) => void;
-  toggleHideLogged: () => void;
-  collapseAll: () => void;
-  /** Wipe all progress. Keeps the selected mode. */
+  toggleEpisode: (entry: Series, index: number) => void;
   purge: () => void;
-  /** Fold an imported log into the current one. */
   merge: (incoming: TrackerState) => void;
-  /** Current state, for export. */
   snapshot: TrackerState;
-  /** True while the account's log is being reconciled with this browser's. */
   syncing: boolean;
 }
 
 /**
- * Owns watch progress and keeps it on disk.
+ * Owns watch progress, position along the route, and the advance animation.
  *
- * State is read from storage synchronously on first render, so a reload paints
- * the logged state immediately rather than flashing an empty tracker and then
- * filling in.
+ * `routeLength` is passed in rather than derived here so this hook stays
+ * independent of the catalog; it is only used to clamp `idx`.
  */
-/**
- * Restore state, expanding the era with unfinished business when storage did
- * not carry one. Done at hydration rather than in an effect so the first paint
- * already shows the right era open.
- */
-function hydrate(): TrackerState {
-  const restored = load();
-  if (restored.openEra) return restored;
-  return { ...restored, openEra: eraToAutoOpen(CATALOG, restored.watched, restored.mode) };
-}
-
-export function useTracker(userId: string | null): Tracker {
-  const [state, setState] = useState<TrackerState>(hydrate);
+export function useTracker(userId: string | null, routeLength: number): Tracker {
+  const [state, setState] = useState<TrackerState>(load);
+  const [anim, setAnim] = useState<Anim>('in');
+  const [stamped, setStamped] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  // Which account the current state belongs to, so a sign-out does not push
-  // one user's log into another's account.
+
   const ownerRef = useRef<string | null>(null);
+  // Every pending step of an advance, so a second mark can cancel the first.
+  // Without this, rapid clicking desyncs idx from the stamp.
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const update = useCallback(
-    (updater: (prev: TrackerState) => TrackerState) => {
-      setState((prev) => {
-        const next = updater(prev);
-        // localStorage stays the offline cache even when signed in — a dropped
-        // connection should cost you nothing.
-        save(next);
-        if (ownerRef.current) void pushRemoteState(ownerRef.current, next);
-        return next;
-      });
-    },
-    [],
-  );
+  const clearTimers = useCallback(() => {
+    for (const timer of timers.current) clearTimeout(timer);
+    timers.current = [];
+  }, []);
 
-  // On sign-in, fold the account's log together with whatever this browser
-  // already had, then push the union back. On sign-out, just stop syncing —
-  // the local copy is left exactly as it is.
+  useEffect(() => clearTimers, [clearTimers]);
+
+  const update = useCallback((updater: (prev: TrackerState) => TrackerState) => {
+    setState((prev) => {
+      const next = updater(prev);
+      save(next);
+      if (ownerRef.current) void pushRemoteState(ownerRef.current, next);
+      return next;
+    });
+  }, []);
+
+  // Clamp whenever the route shrinks — changing plan mode can strand idx past
+  // the end of the new route.
+  useEffect(() => {
+    if (routeLength <= 0) return;
+    setState((prev) => {
+      const clamped = Math.min(prev.idx, routeLength - 1);
+      if (clamped === prev.idx) return prev;
+      const next = { ...prev, idx: clamped };
+      save(next);
+      return next;
+    });
+  }, [routeLength]);
+
   useEffect(() => {
     if (!userId) {
       ownerRef.current = null;
@@ -86,7 +92,6 @@ export function useTracker(userId: string | null): Tracker {
     void (async () => {
       const remote = await fetchRemoteState(userId);
       if (cancelled) return;
-
       if (remote) {
         setState((prev) => {
           const merged = reconcile(prev, remote);
@@ -96,7 +101,7 @@ export function useTracker(userId: string | null): Tracker {
         });
       }
       // A failed read means the network is down, not that the account is
-      // empty — so nothing is pushed, and local progress is left untouched.
+      // empty — so nothing is pushed and local progress is left alone.
       ownerRef.current = remote ? userId : null;
       setSyncing(false);
     })();
@@ -106,9 +111,6 @@ export function useTracker(userId: string | null): Tracker {
     };
   }, [userId]);
 
-  // Writes are debounced, so force any queued one out before the page goes
-  // away. pagehide covers navigation and tab close; visibilitychange covers
-  // mobile backgrounding, where pagehide is not guaranteed to fire.
   useEffect(() => {
     const onHide = () => flush();
     const onVisibility = () => {
@@ -123,15 +125,54 @@ export function useTracker(userId: string | null): Tracker {
     };
   }, []);
 
+  const goTo = useCallback(
+    (index: number) => {
+      clearTimers();
+      setStamped(false);
+      setAnim('in');
+      update((prev) => ({
+        ...prev,
+        idx: Math.max(0, Math.min(index, Math.max(0, routeLength - 1))),
+      }));
+    },
+    [clearTimers, routeLength, update],
+  );
+
+  /** Stamp, hold, slide out, step forward, slide in. */
+  const advance = useCallback(() => {
+    clearTimers();
+    const at = (ms: number, fn: () => void) => {
+      timers.current.push(setTimeout(fn, ms));
+    };
+
+    setStamped(true);
+    at(HOLD_MS, () => setAnim('out'));
+    at(HOLD_MS + SLIDE_OUT_MS, () => {
+      setStamped(false);
+      setAnim('in');
+      update((prev) => ({ ...prev, idx: Math.min(prev.idx + 1, Math.max(0, routeLength - 1)) }));
+    });
+  }, [clearTimers, routeLength, update]);
+
   const setMode = useCallback(
-    (mode: Mode) => update((prev) => (prev.mode === mode ? prev : { ...prev, mode })),
-    [update],
+    (mode: Mode) => {
+      clearTimers();
+      setStamped(false);
+      // Position is kept, not reset — the clamp effect pulls it back into
+      // range if the new route is shorter. Switching plans should not cost you
+      // your place when the station you were on still exists.
+      update((prev) => (prev.mode === mode ? prev : { ...prev, mode }));
+    },
+    [clearTimers, update],
   );
 
   const toggleEntry = useCallback(
-    (entry: Entry) =>
+    (entry: Entry) => {
+      let completed = false;
       update((prev) => {
         const watched = { ...prev.watched };
+        const before = statusOf(entry, watched[entry.id]);
+
         if (entry.kind === 'film') {
           if (watched[entry.id]) delete watched[entry.id];
           else watched[entry.id] = true;
@@ -141,15 +182,20 @@ export function useTracker(userId: string | null): Tracker {
           if (logged === entry.episodes.length) delete watched[entry.id];
           else watched[entry.id] = entry.episodes.map((_, index) => index);
         }
+
+        // Only completing advances. Unmarking must never move you on.
+        completed = before !== 'full' && statusOf(entry, watched[entry.id]) === 'full';
         return { ...prev, watched };
-      }),
-    [update],
+      });
+      if (completed) advance();
+    },
+    [advance, update],
   );
 
   const toggleEpisode = useCallback(
-    (entry: Entry, index: number) =>
+    (entry: Series, index: number) => {
+      let completed = false;
       update((prev) => {
-        if (entry.kind !== 'series') return prev;
         const current = prev.watched[entry.id];
         const episodes = Array.isArray(current) ? [...current] : [];
         const at = episodes.indexOf(index);
@@ -157,69 +203,39 @@ export function useTracker(userId: string | null): Tracker {
         else episodes.push(index);
 
         const watched = { ...prev.watched };
-        // Unwatched entries are absent rather than empty, so progress stays a
-        // record of what was actually logged.
         if (episodes.length) watched[entry.id] = episodes.sort((a, b) => a - b);
         else delete watched[entry.id];
+
+        completed =
+          statusOf(entry, current) !== 'full' && statusOf(entry, watched[entry.id]) === 'full';
         return { ...prev, watched };
-      }),
-    [update],
+      });
+      if (completed) advance();
+    },
+    [advance, update],
   );
 
-  const toggleOpen = useCallback(
-    (entry: Entry) =>
-      update((prev) => {
-        const open = prev.open.includes(entry.id)
-          ? prev.open.filter((id) => id !== entry.id)
-          : [...prev.open, entry.id];
-        return { ...prev, open };
-      }),
-    [update],
-  );
-
-  const setOpenEra = useCallback(
-    (eraId: string | null) =>
-      // Opening one era closes whichever was open — the accordion holds a
-      // single id rather than a set.
-      update((prev) => ({ ...prev, openEra: prev.openEra === eraId ? null : eraId })),
-    [update],
-  );
-
-  const toggleHideLogged = useCallback(
-    () => update((prev) => ({ ...prev, hideLogged: !prev.hideLogged })),
-    [update],
-  );
-
-  const collapseAll = useCallback(
-    () => update((prev) => ({ ...prev, openEra: null, open: [] })),
-    [update],
-  );
-
-  const purge = useCallback(
-    () => update((prev) => ({ ...prev, watched: {}, open: [] })),
-    [update],
-  );
+  const purge = useCallback(() => {
+    clearTimers();
+    setStamped(false);
+    update((prev) => ({ ...prev, watched: {}, idx: 0 }));
+  }, [clearTimers, update]);
 
   const merge = useCallback(
     (incoming: TrackerState) => update((prev) => mergeStates(prev, incoming)),
     [update],
   );
 
-  const open = useMemo(() => new Set(state.open), [state.open]);
-
   return {
     mode: state.mode,
     watched: state.watched,
-    open,
+    idx: state.idx,
+    anim,
+    stamped,
     setMode,
+    goTo,
     toggleEntry,
     toggleEpisode,
-    toggleOpen,
-    openEra: state.openEra,
-    hideLogged: state.hideLogged,
-    setOpenEra,
-    toggleHideLogged,
-    collapseAll,
     purge,
     merge,
     snapshot: state,

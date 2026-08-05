@@ -226,28 +226,28 @@ class Component extends DCLogic {
     const E = [
       { id: 'ancient', name: 'The Ancient World', span: '1260 BC — 1942', dialect: 'gold-leaf relief · carved stone',
         bg: 'radial-gradient(120% 80% at 50% 0%, #241a10, #120d08)', ink: '#f0e2c6', sub: '#9a8a6f', a: '#c9922f', cb: '#181108', bd: '#3a2b16',
-        pbg: 'radial-gradient(circle at 50% 30%, rgba(201,146,47,.55), transparent 62%), repeating-linear-gradient(90deg,#17110c 0 3px,#251a0f 3px 6px)', pink: '#e8c579',
+        pbg: 'radial-gradient(circle at 50% 30%, rgba(201,146,47,.55), transparent 62%), repeating-linear-gradient(90deg,#17110c 0 3px,#251a0f 3px 6px)', pink: '#e8c579', tex: 'repeating-linear-gradient(90deg, rgba(201,146,47,.5) 0 2px, transparent 2px 9px)',
         entries: [
           s('EOW', 'Eyes of Wakanda', '1260 BC', 4, 3, 0, 'Bast’s Dora Milaje hunt vibranium artifacts — watch the mask lineage.', { epMin: 30 }),
         ] },
 
       { id: 'war', name: 'The War Years', span: '1943 — 1949', dialect: 'wartime propaganda litho · stencil caps',
         bg: 'linear-gradient(180deg,#e4dac6,#cfc3a9)', ink: '#1b1611', sub: '#5c5343', a: '#b3261e', cb: '#efe7d6', bd: '#a2947c',
-        pbg: 'repeating-linear-gradient(45deg, rgba(179,38,30,.22) 0 5px, transparent 5px 11px), radial-gradient(circle at 30% 20%, #efe7d6, #b8ab92)', pink: '#8f1b15',
+        pbg: 'repeating-linear-gradient(45deg, rgba(179,38,30,.22) 0 5px, transparent 5px 11px), radial-gradient(circle at 30% 20%, #efe7d6, #b8ab92)', pink: '#8f1b15', tex: 'repeating-linear-gradient(45deg, rgba(27,22,17,.45) 0 3px, transparent 3px 10px)',
         entries: [
           f('CA1', 'Captain America: The First Avenger', '1943', 124, 1, 1, 'The Tesseract’s first on-screen custody chain — it never stops moving.'),
         ] },
 
       { id: 'vhs', name: 'Cosmic Static', span: '1995', dialect: 'VHS tracking error · rental-store grain',
         bg: 'linear-gradient(180deg,#140b18,#0c0710)', ink: '#f2e9ff', sub: '#9a8fae', a: '#ff2fa8', cb: '#170e1c', bd: '#3b2748',
-        pbg: 'repeating-linear-gradient(0deg, rgba(0,0,0,.45) 0 2px, transparent 2px 4px), linear-gradient(120deg, rgba(255,47,168,.6), rgba(0,229,255,.5)), #140b18', pink: '#00e5ff',
+        pbg: 'repeating-linear-gradient(0deg, rgba(0,0,0,.45) 0 2px, transparent 2px 4px), linear-gradient(120deg, rgba(255,47,168,.6), rgba(0,229,255,.5)), #140b18', pink: '#00e5ff', tex: 'repeating-linear-gradient(0deg, rgba(255,47,168,.5) 0 1px, transparent 1px 5px)',
         entries: [
           f('CM', 'Captain Marvel', '1995', 123, 2, 2, 'Fury’s pager — the ringtone that ends Infinity War.'),
         ] },
 
       { id: 'birth', name: 'Birth of Heroes', span: '2010 — 2012', dialect: 'machined steel · blueprint rule',
         bg: 'linear-gradient(180deg,#0f1519,#0b0f12)', ink: '#e4edf2', sub: '#7f8f99', a: '#5fb0c9', cb: '#111a1f', bd: '#26343c',
-        pbg: 'linear-gradient(160deg,#2b3a48,#0f1519), repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 8px)', pink: '#9fd6e6',
+        pbg: 'linear-gradient(160deg,#2b3a48,#0f1519), repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 8px)', pink: '#9fd6e6', tex: 'repeating-linear-gradient(0deg, rgba(95,176,201,.4) 0 1px, transparent 1px 22px), repeating-linear-gradient(90deg, rgba(95,176,201,.4) 0 1px, transparent 1px 22px)',
         entries: [
           f('IM1', 'Iron Man', '2010', 126, 1, 1, 'The first stinger in the canon — the word "Avenger" spoken aloud.'),
           f('IH', 'The Incredible Hulk', '2010', 112, 2, 1, 'Ross in the bar — the seed of Thunderbolts*.'),
@@ -258,7 +258,7 @@ class Component extends DCLogic {
 
       { id: 'street', name: 'Street Level', span: '2013 — 2019', dialect: 'noir rain · neon signage · wet asphalt',
         bg: 'linear-gradient(180deg,#0a0708,#080607)', ink: '#eadfe0', sub: '#8c7c7f', a: '#e11d48', cb: '#100b0d', bd: '#2c1c21',
-        pbg: 'radial-gradient(circle at 70% 80%, rgba(225,29,72,.5), transparent 60%), repeating-linear-gradient(75deg, rgba(255,255,255,.06) 0 1px, transparent 1px 5px), #0a0708', pink: '#ff5d7d',
+        pbg: 'radial-gradient(circle at 70% 80%, rgba(225,29,72,.5), transparent 60%), repeating-linear-gradient(75deg, rgba(255,255,255,.06) 0 1px, transparent 1px 5px), #0a0708', pink: '#ff5d7d', tex: 'repeating-linear-gradient(76deg, rgba(225,29,72,.45) 0 1px, transparent 1px 7px)',
         entries: [
           s('DD1', 'Daredevil S1', '2015', DD1, 2, 0, 'The hallway fight — the grammar Born Again inherits.'),
           s('JJ1', 'Jessica Jones S1', '2015', 13, 3, 0, 'Kilgrave’s powers as trauma, not spectacle.'),
@@ -277,7 +277,7 @@ class Component extends DCLogic {
 
       { id: 'shield', name: 'The Widening War', span: '2013 — 2018', dialect: 'agency dossier · redaction bars',
         bg: 'linear-gradient(180deg,#0d1013,#0a0c0e)', ink: '#e6e9ec', sub: '#828a91', a: '#8fa3b3', cb: '#12161a', bd: '#252c33',
-        pbg: 'linear-gradient(200deg,#38424c,#0d1013), repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 2px, transparent 2px 9px)', pink: '#cfd8de',
+        pbg: 'linear-gradient(200deg,#38424c,#0d1013), repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 2px, transparent 2px 9px)', pink: '#cfd8de', tex: 'repeating-linear-gradient(0deg, rgba(143,163,179,.5) 0 6px, transparent 6px 15px)',
         entries: [
           f('IM3', 'Iron Man 3', '2013', 130, 2, 1, 'Extremis — the tech Wonder Man’s Hollywood still trades on.'),
           f('TH2', 'Thor: The Dark World', '2013', 112, 3, 2, 'The Aether handed to the Collector.'),
@@ -298,7 +298,7 @@ class Component extends DCLogic {
 
       { id: 'blip', name: 'The Blip', span: '2018 — 2024', dialect: 'ash and chalk · memorial rule',
         bg: 'linear-gradient(180deg,#131313,#0c0c0c)', ink: '#ececec', sub: '#8a8a8a', a: '#d0c8b8', cb: '#161616', bd: '#2b2b2b',
-        pbg: 'radial-gradient(circle at 50% 65%, rgba(208,200,184,.35), transparent 60%), repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 7px), #131313', pink: '#f2ece0',
+        pbg: 'radial-gradient(circle at 50% 65%, rgba(208,200,184,.35), transparent 60%), repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 7px), #131313', pink: '#f2ece0', tex: 'repeating-linear-gradient(0deg, rgba(208,200,184,.35) 0 1px, transparent 1px 4px)',
         entries: [
           f('AV3', 'Avengers: Infinity War', '2018', 149, 1, 0, 'The only film with no stinger — the silence is the point.'),
           f('AV4', 'Avengers: Endgame', '2023', 181, 1, 0, 'The branched timelines nobody cleaned up — Doomsday’s fuel.', { drop: 'RE-RELEASE 25 SEP' }),
@@ -311,7 +311,7 @@ class Component extends DCLogic {
 
       { id: 'tva', name: 'TVA · Sacred Timeline', span: 'For All Time. Always.', dialect: 'brutalist bureaucracy · CRT amber · file tabs',
         bg: 'linear-gradient(180deg,#2b1f13,#1d150c)', ink: '#f6e2bd', sub: '#b09263', a: '#e08a2e', cb: '#241a10', bd: '#5a3f1d',
-        pbg: 'repeating-linear-gradient(0deg, rgba(0,0,0,.35) 0 2px, transparent 2px 4px), radial-gradient(circle at 50% 45%, #e08a2e, #7a4210)', pink: '#2b1f13',
+        pbg: 'repeating-linear-gradient(0deg, rgba(0,0,0,.35) 0 2px, transparent 2px 4px), radial-gradient(circle at 50% 45%, #e08a2e, #7a4210)', pink: '#2b1f13', tex: 'repeating-linear-gradient(0deg, rgba(224,138,46,.5) 0 2px, transparent 2px 6px)',
         entries: [
           s('LK1', 'Loki S1', '∞', LOKI1, 1, 0, 'He Who Remains explains the whole endgame in one monologue.', { epMin: 50 }),
           s('LK2', 'Loki S2', '∞', LOKI2, 1, 0, 'Loki becomes the loom — the multiverse is now load-bearing.', { epMin: 52 }),
@@ -323,7 +323,7 @@ class Component extends DCLogic {
 
       { id: 'multi', name: 'The Multiverse Saga', span: '2024 — 2026', dialect: 'fractured plate glass · chromatic split',
         bg: 'linear-gradient(180deg,#0d0a14,#0a0810)', ink: '#eae6f5', sub: '#8b849f', a: '#8f6dff', cb: '#12101c', bd: '#2a2440',
-        pbg: 'linear-gradient(135deg, rgba(143,109,255,.55), transparent 55%), repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 6px), #0d0a14', pink: '#c9bcff',
+        pbg: 'linear-gradient(135deg, rgba(143,109,255,.55), transparent 55%), repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 6px), #0d0a14', pink: '#c9bcff', tex: 'repeating-linear-gradient(115deg, rgba(143,109,255,.45) 0 2px, transparent 2px 13px)',
         entries: [
           f('SM3', 'Spider-Man: No Way Home', '2024', 148, 1, 2, 'The forgetting spell — the first sanctioned incursion.', { svc: 'NETFLIX', url: 'https://www.netflix.com/search?q=Spider-Man%20No%20Way%20Home' }),
           s('HWK', 'Hawkeye', '2024', 6, 3, 0, 'Kingpin re-enters the film canon.', { epMin: 47 }),
@@ -351,7 +351,7 @@ class Component extends DCLogic {
 
       { id: 'x828', name: 'Earth-828', span: 'Atomic Age · Elsewhere', dialect: '1960s retro-futurism · atomic optimism',
         bg: 'linear-gradient(180deg,#efe4cd,#ded1b4)', ink: '#141a1c', sub: '#5c5a4e', a: '#0f7c92', cb: '#f7efdd', bd: '#a89c80',
-        pbg: 'repeating-conic-gradient(from 0deg at 50% 45%, rgba(15,124,146,.18) 0deg 6deg, transparent 6deg 12deg), radial-gradient(circle at 50% 45%, #f8f0dd, #d3c5a6)', pink: '#0b5f70',
+        pbg: 'repeating-conic-gradient(from 0deg at 50% 45%, rgba(15,124,146,.18) 0deg 6deg, transparent 6deg 12deg), radial-gradient(circle at 50% 45%, #f8f0dd, #d3c5a6)', pink: '#0b5f70', tex: 'repeating-conic-gradient(from 0deg at 50% 50%, rgba(15,124,146,.35) 0deg 4deg, transparent 4deg 14deg)',
         entries: [
           f('FF4', 'The Fantastic Four: First Steps', '1964 · 828', 130, 1, 2, 'Franklin Richards, Galactus, and a ship that leaves for 616.'),
         ] },
@@ -359,7 +359,7 @@ class Component extends DCLogic {
       { id: 'x10005', name: 'Earth-10005', span: 'Parallel Rail · Fox Canon', dialect: 'collision rail · yellow-and-blue steel',
         parallel: true,
         bg: 'linear-gradient(180deg,#121212,#0c0c0c)', ink: '#f6efd8', sub: '#8f8a76', a: '#f0c419', cb: '#171717', bd: '#3a3520',
-        pbg: 'linear-gradient(135deg,#f0c419 0 44%,#111 44% 56%,#2e6cb5 56%)', pink: '#111111',
+        pbg: 'linear-gradient(135deg,#f0c419 0 44%,#111 44% 56%,#2e6cb5 56%)', pink: '#111111', tex: 'repeating-linear-gradient(135deg, rgba(240,196,25,.45) 0 8px, rgba(46,108,181,.45) 8px 16px)',
         entries: [
           f('XFC', 'X-Men: First Class', '1962 · 10005', 132, 3, 0, 'Where the rail forks from real history.'),
           f('XDF', 'X-Men: Days of Future Past', '1973', 132, 3, 1, 'The Fox canon’s own timeline reset — precedent for Doom.'),
@@ -377,7 +377,7 @@ class Component extends DCLogic {
 
       { id: 'x97', name: 'The Animated Rails', span: '∞ · Broadcast', dialect: 'cel-shaded chrome · 90s title card',
         bg: 'linear-gradient(180deg,#101828,#0b111c)', ink: '#e8eefb', sub: '#8493ad', a: '#f0a30a', cb: '#141d2e', bd: '#28374f',
-        pbg: 'linear-gradient(160deg, rgba(240,163,10,.6), transparent 60%), repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, transparent 2px 10px), #101828', pink: '#ffd77a',
+        pbg: 'linear-gradient(160deg, rgba(240,163,10,.6), transparent 60%), repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, transparent 2px 10px), #101828', pink: '#ffd77a', tex: 'repeating-linear-gradient(90deg, rgba(240,163,10,.45) 0 2px, transparent 2px 11px)',
         entries: [
           s('X97', "X-Men '97 S1", '∞', X97, 2, 0, 'Bastion, Genosha, and a Doom cameo in Latveria.', { epMin: 32 }),
           s('X98', "X-Men '97 S2", '∞', 10, 3, 0, 'Time-scattered team — arriving into Doomsday season.', { epMin: 32, drop: 'DROPS 2026' }),
@@ -386,7 +386,7 @@ class Component extends DCLogic {
 
       { id: 'finale', name: 'The Doom Approach', span: 'Oct — Dec 2026', dialect: 'Latverian bronze · green enamel · sealed writ',
         bg: 'linear-gradient(180deg,#0e1a12,#0a1a0f)', ink: '#e9f0e6', sub: '#8fa08c', a: '#a8763e', cb: '#101d14', bd: '#2f4a35',
-        pbg: 'radial-gradient(circle at 50% 40%, #2e5e3f, #0b140e), repeating-linear-gradient(45deg, rgba(168,118,62,.22) 0 4px, transparent 4px 10px)', pink: '#d9b177',
+        pbg: 'radial-gradient(circle at 50% 40%, #2e5e3f, #0b140e), repeating-linear-gradient(45deg, rgba(168,118,62,.22) 0 4px, transparent 4px 10px)', pink: '#d9b177', tex: 'repeating-linear-gradient(45deg, rgba(168,118,62,.45) 0 4px, transparent 4px 12px)',
         entries: [
           f('SBD', 'Spider-Man: Brand New Day', '2026', 130, 1, 2, 'Theatrical, 31 Jul — the last film before the muster.', { svc: 'IN CINEMAS', url: 'https://www.hotstar.com/in/search?q=Spider-Man%20Brand%20New%20Day', drop: 'IN CINEMAS 31 JUL' }),
           s('VQ', 'VisionQuest', '2026', 8, 1, 0, 'White Vision rebuilds himself — weekly from 14 Oct. Watch live.', { epMin: 48, drop: 'WEEKLY · FROM 14 OCT' }),

@@ -56,6 +56,7 @@ for (const er of eras) {
   out.push(`      border: ${q(er.bd)},`);
   out.push(`      posterBg: ${q(er.pbg)},`);
   out.push(`      posterInk: ${q(er.pink)},`);
+  out.push(`      texture: ${q(er.tex)},`);
   out.push('    },');
   out.push('    entries: [');
   for (const e of er.entries) {
@@ -135,6 +136,7 @@ seed.push(
         border: er.bd,
         posterBg: er.pbg,
         posterInk: er.pink,
+        texture: er.tex,
       })})`,
     )
     .join(',\n') + ';',

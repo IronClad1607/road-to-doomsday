@@ -33,6 +33,12 @@ export interface EraPalette {
   posterBg: string;
   /** Colour of the glyph drawn on the poster. */
   posterInk: string;
+  /**
+   * Full-bleed background texture for the era. In the route view an era owns
+   * the whole viewport, so it needs pattern as well as colour; rendered at low
+   * opacity behind the stage.
+   */
+  texture: string;
 }
 
 interface EntryBase {

@@ -170,9 +170,66 @@ export function erasInMode(catalog: readonly Era[], mode: Mode): readonly Era[] 
   return catalog.filter((era) => era.entries.some((entry) => isInMode(entry, mode)));
 }
 
-export interface NextUp {
+/** One stop on the route: an entry together with the era it belongs to. */
+export interface Station {
   entry: Entry;
   era: Era;
+}
+
+export type NextUp = Station;
+
+/**
+ * The route: every in-plan entry flattened into story order.
+ *
+ * The route view travels this list one station at a time, so the era grouping
+ * survives only as each station's `era` reference and as the rail's legs.
+ */
+export function buildRoute(catalog: readonly Era[], mode: Mode): readonly Station[] {
+  return catalog.flatMap((era) =>
+    era.entries.filter((entry) => isInMode(entry, mode)).map((entry) => ({ entry, era })),
+  );
+}
+
+/** Consecutive runs of stations sharing an era — one leg of the rail. */
+export interface Leg {
+  era: Era;
+  /** Route indices belonging to this leg, in order. */
+  indices: readonly number[];
+  done: number;
+}
+
+export function buildLegs(route: readonly Station[], watched: WatchedState): readonly Leg[] {
+  const legs: Leg[] = [];
+  route.forEach((station, index) => {
+    const last = legs[legs.length - 1];
+    const done = statusOf(station.entry, watched[station.entry.id]) === 'full' ? 1 : 0;
+    if (last && last.era.id === station.era.id) {
+      (last.indices as number[]).push(index);
+      last.done += done;
+    } else {
+      legs.push({ era: station.era, indices: [index], done });
+    }
+  });
+  return legs;
+}
+
+/**
+ * Index of the next station that is not fully logged, searching forward from
+ * `from` and wrapping. Returns -1 when the whole route is done.
+ */
+export function nextUnseenIndex(
+  route: readonly Station[],
+  watched: WatchedState,
+  from: number,
+): number {
+  for (let step = 1; step <= route.length; step += 1) {
+    const index = (from + step) % route.length;
+    const station = route[index];
+    if (station && statusOf(station.entry, watched[station.entry.id]) !== 'full') return index;
+  }
+  const current = route[from];
+  if (current && statusOf(current.entry, watched[current.entry.id]) !== 'full') return from;
+  return -1;
 }
 
 /**

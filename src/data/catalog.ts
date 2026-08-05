@@ -23,6 +23,7 @@ export const CATALOG: readonly Era[] = [
       border: '#3a2b16',
       posterBg: 'radial-gradient(circle at 50% 30%, rgba(201,146,47,.55), transparent 62%), repeating-linear-gradient(90deg,#17110c 0 3px,#251a0f 3px 6px)',
       posterInk: '#e8c579',
+      texture: 'repeating-linear-gradient(90deg, rgba(201,146,47,.5) 0 2px, transparent 2px 9px)',
     },
     entries: [
       {
@@ -52,6 +53,7 @@ export const CATALOG: readonly Era[] = [
       border: '#a2947c',
       posterBg: 'repeating-linear-gradient(45deg, rgba(179,38,30,.22) 0 5px, transparent 5px 11px), radial-gradient(circle at 30% 20%, #efe7d6, #b8ab92)',
       posterInk: '#8f1b15',
+      texture: 'repeating-linear-gradient(45deg, rgba(27,22,17,.45) 0 3px, transparent 3px 10px)',
     },
     entries: [
       {
@@ -80,6 +82,7 @@ export const CATALOG: readonly Era[] = [
       border: '#3b2748',
       posterBg: 'repeating-linear-gradient(0deg, rgba(0,0,0,.45) 0 2px, transparent 2px 4px), linear-gradient(120deg, rgba(255,47,168,.6), rgba(0,229,255,.5)), #140b18',
       posterInk: '#00e5ff',
+      texture: 'repeating-linear-gradient(0deg, rgba(255,47,168,.5) 0 1px, transparent 1px 5px)',
     },
     entries: [
       {
@@ -108,6 +111,7 @@ export const CATALOG: readonly Era[] = [
       border: '#26343c',
       posterBg: 'linear-gradient(160deg,#2b3a48,#0f1519), repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 8px)',
       posterInk: '#9fd6e6',
+      texture: 'repeating-linear-gradient(0deg, rgba(95,176,201,.4) 0 1px, transparent 1px 22px), repeating-linear-gradient(90deg, rgba(95,176,201,.4) 0 1px, transparent 1px 22px)',
     },
     entries: [
       {
@@ -176,6 +180,7 @@ export const CATALOG: readonly Era[] = [
       border: '#2c1c21',
       posterBg: 'radial-gradient(circle at 70% 80%, rgba(225,29,72,.5), transparent 60%), repeating-linear-gradient(75deg, rgba(255,255,255,.06) 0 1px, transparent 1px 5px), #0a0708',
       posterInk: '#ff5d7d',
+      texture: 'repeating-linear-gradient(76deg, rgba(225,29,72,.45) 0 1px, transparent 1px 7px)',
     },
     entries: [
       {
@@ -379,6 +384,7 @@ export const CATALOG: readonly Era[] = [
       border: '#252c33',
       posterBg: 'linear-gradient(200deg,#38424c,#0d1013), repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 2px, transparent 2px 9px)',
       posterInk: '#cfd8de',
+      texture: 'repeating-linear-gradient(0deg, rgba(143,163,179,.5) 0 6px, transparent 6px 15px)',
     },
     entries: [
       {
@@ -550,6 +556,7 @@ export const CATALOG: readonly Era[] = [
       border: '#2b2b2b',
       posterBg: 'radial-gradient(circle at 50% 65%, rgba(208,200,184,.35), transparent 60%), repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 7px), #131313',
       posterInk: '#f2ece0',
+      texture: 'repeating-linear-gradient(0deg, rgba(208,200,184,.35) 0 1px, transparent 1px 4px)',
     },
     entries: [
       {
@@ -653,6 +660,7 @@ export const CATALOG: readonly Era[] = [
       border: '#5a3f1d',
       posterBg: 'repeating-linear-gradient(0deg, rgba(0,0,0,.35) 0 2px, transparent 2px 4px), radial-gradient(circle at 50% 45%, #e08a2e, #7a4210)',
       posterInk: '#2b1f13',
+      texture: 'repeating-linear-gradient(0deg, rgba(224,138,46,.5) 0 2px, transparent 2px 6px)',
     },
     entries: [
       {
@@ -761,6 +769,7 @@ export const CATALOG: readonly Era[] = [
       border: '#2a2440',
       posterBg: 'linear-gradient(135deg, rgba(143,109,255,.55), transparent 55%), repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 6px), #0d0a14',
       posterInk: '#c9bcff',
+      texture: 'repeating-linear-gradient(115deg, rgba(143,109,255,.45) 0 2px, transparent 2px 13px)',
     },
     entries: [
       {
@@ -1012,6 +1021,7 @@ export const CATALOG: readonly Era[] = [
       border: '#a89c80',
       posterBg: 'repeating-conic-gradient(from 0deg at 50% 45%, rgba(15,124,146,.18) 0deg 6deg, transparent 6deg 12deg), radial-gradient(circle at 50% 45%, #f8f0dd, #d3c5a6)',
       posterInk: '#0b5f70',
+      texture: 'repeating-conic-gradient(from 0deg at 50% 50%, rgba(15,124,146,.35) 0deg 4deg, transparent 4deg 14deg)',
     },
     entries: [
       {
@@ -1041,6 +1051,7 @@ export const CATALOG: readonly Era[] = [
       border: '#3a3520',
       posterBg: 'linear-gradient(135deg,#f0c419 0 44%,#111 44% 56%,#2e6cb5 56%)',
       posterInk: '#111111',
+      texture: 'repeating-linear-gradient(135deg, rgba(240,196,25,.45) 0 8px, rgba(46,108,181,.45) 8px 16px)',
     },
     entries: [
       {
@@ -1180,6 +1191,7 @@ export const CATALOG: readonly Era[] = [
       border: '#28374f',
       posterBg: 'linear-gradient(160deg, rgba(240,163,10,.6), transparent 60%), repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, transparent 2px 10px), #101828',
       posterInk: '#ffd77a',
+      texture: 'repeating-linear-gradient(90deg, rgba(240,163,10,.45) 0 2px, transparent 2px 11px)',
     },
     entries: [
       {
@@ -1244,6 +1256,7 @@ export const CATALOG: readonly Era[] = [
       border: '#2f4a35',
       posterBg: 'radial-gradient(circle at 50% 40%, #2e5e3f, #0b140e), repeating-linear-gradient(45deg, rgba(168,118,62,.22) 0 4px, transparent 4px 10px)',
       posterInk: '#d9b177',
+      texture: 'repeating-linear-gradient(45deg, rgba(168,118,62,.45) 0 4px, transparent 4px 12px)',
     },
     entries: [
       {

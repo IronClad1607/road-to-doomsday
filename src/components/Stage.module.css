@@ -1,0 +1,348 @@
+.stage {
+  position: relative;
+  flex: 1;
+  /* Without this the flex child refuses to shrink and the rail is pushed off
+     the bottom of the viewport. */
+  min-height: 0;
+  overflow: hidden;
+  background: var(--era-bg);
+  color: var(--era-ink);
+  /* Moving between eras should read as a reality bleed, not a cut. */
+  transition: background 450ms ease, color 450ms ease;
+}
+
+/* Full-bleed era texture. */
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--era-tex);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+/* Oversized era glyph, sitting behind everything as a watermark. */
+.watermark {
+  position: absolute;
+  right: -0.06em;
+  bottom: -0.22em;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(180px, 42vw, 460px);
+  line-height: 0.7;
+  color: var(--era-ink);
+  opacity: 0.07;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.scroll {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px var(--content-pad) 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+  gap: 22px;
+  align-items: start;
+}
+
+/* Slide transitions for the advance sequence. */
+.animIn {
+  animation: stationIn 280ms ease both;
+}
+
+.animOut {
+  animation: stationOut 190ms ease both;
+}
+
+@keyframes stationIn {
+  from {
+    opacity: 0;
+    transform: translateX(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes stationOut {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-26px);
+  }
+}
+
+.eraLine {
+  font-size: var(--fs-label);
+  letter-spacing: 0.2em;
+  color: var(--era-accent);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(34px, 7vw, 68px);
+  line-height: 0.9;
+  text-transform: uppercase;
+  margin: 8px 0 0;
+  color: var(--era-ink);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  margin-top: 12px;
+}
+
+.chip {
+  border: 1px solid var(--era-border);
+  color: var(--era-accent);
+  padding: 3px 7px;
+}
+
+.runtime {
+  color: var(--era-sub);
+}
+
+.stingers {
+  background: var(--era-accent);
+  color: #0b0908;
+  padding: 3px 7px;
+  font-weight: 600;
+}
+
+.drop {
+  border: 1px dashed var(--gold);
+  color: #d9a15c;
+  padding: 3px 7px;
+  animation: rtdBreathe 3s ease-in-out infinite;
+}
+
+.clue {
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--era-sub);
+  margin: 14px 0 0;
+  max-width: 54ch;
+}
+
+.clueLabel {
+  color: var(--era-accent);
+  letter-spacing: 0.1em;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.mark,
+.watch {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 16px;
+  border: 1px solid var(--era-border);
+  font-size: var(--fs-label);
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.mark {
+  background: transparent;
+  color: var(--era-sub);
+}
+
+.markDone {
+  border-color: var(--era-accent);
+  background: var(--era-accent);
+  color: #0b0908;
+}
+
+.watch {
+  color: var(--era-ink);
+  font-weight: 400;
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.poster {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--era-poster-ink);
+  background: var(--era-poster-bg);
+  border: 1px solid var(--era-border);
+}
+
+.glyph {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(46px, 9vw, 76px);
+  line-height: 0.86;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.kind {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.16em;
+  text-align: center;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #efe6d6;
+}
+
+/* The LOGGED stamp, struck across the poster on completion. */
+.stamp {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: stampIn 500ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.stampInk {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(26px, 5vw, 42px);
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  border: 4px solid var(--gold);
+  padding: 4px 12px;
+  transform: rotate(-14deg);
+  background: rgba(11, 9, 8, 0.72);
+}
+
+@keyframes stampIn {
+  from {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+  70% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.episodesHeading {
+  font-size: var(--fs-label);
+  letter-spacing: 0.18em;
+  color: var(--era-sub);
+}
+
+.episodes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 4px;
+}
+
+.episode {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 8px;
+  font-size: var(--fs-label);
+  letter-spacing: 0.05em;
+  text-align: left;
+  border: 1px solid var(--era-border);
+  background: transparent;
+  color: var(--era-sub);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.episodeWatched {
+  border-color: var(--era-accent);
+  background: var(--era-accent-wash);
+  color: var(--era-ink);
+}
+
+.episodeNumber {
+  opacity: 0.55;
+}
+
+.episodeTitle {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 40px var(--content-pad);
+  text-align: center;
+  font-size: var(--fs-body);
+  letter-spacing: 0.14em;
+  color: var(--shell-muted);
+}
+
+/* Portrait phone: single column, poster above the detail. */
+@media (max-width: 720px) {
+  .inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .aside {
+    order: -1;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .poster {
+    flex: 0 0 108px;
+    width: 108px;
+  }
+
+  .episodesPanel {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animIn,
+  .animOut,
+  .stamp {
+    animation: none;
+  }
+}

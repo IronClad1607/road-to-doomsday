@@ -1,0 +1,136 @@
+.header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px var(--content-pad);
+  background: var(--shell-bg);
+  border-bottom: 1px solid var(--shell-line);
+  z-index: 20;
+}
+
+.brand {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 17px;
+  line-height: 0.86;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--shell-ink);
+  white-space: nowrap;
+}
+
+.brandAccent {
+  display: block;
+  color: var(--green);
+  -webkit-text-stroke: 0.5px var(--gold);
+}
+
+.station {
+  flex: 0 0 auto;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.16em;
+  color: var(--shell-muted);
+  white-space: nowrap;
+}
+
+/* The bar and its percentage share a row; the percentage under the countdown
+   is what wrapped and pushed the header apart in the intermediate build. */
+.progress {
+  flex: 1;
+  min-width: 60px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meter {
+  position: relative;
+  flex: 1;
+  min-width: 40px;
+  height: 7px;
+  background: #1a1512;
+  border: 1px solid #2a231d;
+  overflow: hidden;
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  transition: width 0.45s ease;
+}
+
+.percent {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--shell-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.countdown {
+  flex: 0 0 auto;
+  text-align: right;
+  /* Never let the clock wrap — it is the widest fixed item in the bar. */
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.days {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 21px;
+  color: var(--shell-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.daysUnit {
+  font-size: var(--fs-micro);
+  letter-spacing: 0.16em;
+  color: var(--shell-muted);
+  margin-left: 3px;
+}
+
+.clock {
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.plan {
+  flex: 0 0 auto;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 11px;
+  border: 1px solid var(--shell-line);
+  color: var(--shell-muted);
+  font-size: var(--fs-label);
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.plan:hover,
+.planOpen {
+  color: var(--shell-ink);
+  border-color: var(--gold);
+}
+
+/*
+ * On a narrow phone the brand goes, but the station counter stays — it is the
+ * route's position readout, not decoration. It just loses its wording.
+ */
+@media (max-width: 640px) {
+  .brand {
+    display: none;
+  }
+
+  .stationWords {
+    display: none;
+  }
+}

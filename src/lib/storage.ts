@@ -1,14 +1,20 @@
-import { ALL_ENTRIES, CATALOG } from '../data/catalog';
+import { ALL_ENTRIES } from '../data/catalog';
 import type { Entry, Mode } from '../data/types';
 import { MODES, type WatchedState } from './progress';
 
 /**
- * Where progress lives. The version is in the key as well as the payload: the
- * key lets an incompatible future schema sit alongside this one, the payload
- * field lets a compatible one migrate in place.
+ * Where progress lives.
+ *
+ * v3 replaced the scrolling timeline with the route view, which changed the
+ * shape of everything except `watched`. The key is versioned alongside it so a
+ * rollback reads its own payload rather than misinterpreting this one.
  */
-const STORAGE_KEY = 'road-to-doomsday:v1';
-const SCHEMA_VERSION = 1;
+const STORAGE_KEY = 'road-to-doomsday:v3';
+
+/** The v1/v2 key, read once so existing progress survives the upgrade. */
+const LEGACY_KEY = 'road-to-doomsday:v1';
+
+const SCHEMA_VERSION = 3;
 
 /**
  * Toggling episodes fires in bursts, so writes are coalesced rather than
@@ -19,28 +25,18 @@ const WRITE_DELAY_MS = 200;
 export interface TrackerState {
   mode: Mode;
   watched: WatchedState;
-  /** Ids of series whose episode lists are expanded. */
-  open: readonly string[];
-  /**
-   * Id of the era currently expanded in the accordion, or null for none.
-   * Only one era is open at a time.
-   */
-  openEra: string | null;
-  /** Whether fully-logged entries are filtered out of the lists. */
-  hideLogged: boolean;
+  /** Position along the derived route. Clamped whenever the route changes. */
+  idx: number;
 }
 
 export const DEFAULT_STATE: TrackerState = {
   mode: 'completionist',
   watched: {},
-  open: [],
-  openEra: null,
-  hideLogged: false,
+  idx: 0,
 };
 
 const ENTRIES_BY_ID = new Map<string, Entry>(ALL_ENTRIES.map((entry) => [entry.id, entry]));
 const VALID_MODES = new Set<string>(MODES.map((mode) => mode.id));
-const ERA_IDS = new Set<string>(CATALOG.map((era) => era.id));
 
 function isMode(value: unknown): value is Mode {
   return typeof value === 'string' && VALID_MODES.has(value);
@@ -88,47 +84,44 @@ export function sanitiseState(raw: unknown): TrackerState {
     }
   }
 
-  const open = Array.isArray(input.open)
-    ? input.open.filter(
-        (id): id is string => typeof id === 'string' && ENTRIES_BY_ID.get(id)?.kind === 'series',
-      )
-    : [];
+  // Only a floor is enforced here; the ceiling depends on the derived route,
+  // which this module knows nothing about, so the tracker clamps it.
+  const idx =
+    typeof input.idx === 'number' && Number.isInteger(input.idx) && input.idx >= 0 ? input.idx : 0;
 
-  // An era can be retired between visits, in which case the stored id no
-  // longer names anything openable — fall back to none and let the auto-open
-  // pick a live era.
-  const openEra =
-    typeof input.openEra === 'string' && ERA_IDS.has(input.openEra) ? input.openEra : null;
+  return { mode, watched, idx };
+}
 
-  return {
-    mode,
-    watched,
-    open: [...new Set(open)],
-    openEra,
-    hideLogged: input.hideLogged === true,
-  };
+function readKey(key: string): unknown {
+  const stored = localStorage.getItem(key);
+  if (!stored) return null;
+  return JSON.parse(stored);
 }
 
 /**
- * Read persisted progress. Never throws: a missing, unreadable or malformed
- * entry just yields a fresh slate, because losing a rewatch log is not worth
- * failing to render the page over.
+ * Read persisted progress, upgrading a v1/v2 payload if that is all there is.
+ *
+ * Never throws: a missing, unreadable or malformed entry just yields a fresh
+ * slate, because losing a rewatch log is not worth failing to render over.
  */
 export function load(): TrackerState {
-  let stored: string | null = null;
   try {
-    stored = localStorage.getItem(STORAGE_KEY);
+    const current = readKey(STORAGE_KEY);
+    if (current) return sanitiseState(current);
   } catch {
-    // Storage can be unavailable entirely (private mode, blocked cookies).
-    return DEFAULT_STATE;
+    // Fall through to the legacy read rather than giving up.
   }
-  if (!stored) return DEFAULT_STATE;
 
   try {
-    return sanitiseState(JSON.parse(stored));
+    const legacy = readKey(LEGACY_KEY);
+    // `watched` is unchanged between versions, so the upgrade is just a matter
+    // of dropping the fields the route view no longer has.
+    if (legacy) return sanitiseState(legacy);
   } catch {
-    return DEFAULT_STATE;
+    // Storage unavailable entirely (private mode, blocked cookies).
   }
+
+  return DEFAULT_STATE;
 }
 
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -151,9 +144,7 @@ export function flush(): void {
         version: SCHEMA_VERSION,
         mode: snapshot.mode,
         watched: snapshot.watched,
-        open: snapshot.open,
-        openEra: snapshot.openEra,
-        hideLogged: snapshot.hideLogged,
+        idx: snapshot.idx,
       }),
     );
   } catch {

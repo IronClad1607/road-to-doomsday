@@ -19,6 +19,7 @@ export function eraVars(palette: EraPalette): CSSProperties {
     '--era-border': palette.border,
     '--era-poster-bg': palette.posterBg,
     '--era-poster-ink': palette.posterInk,
+    '--era-tex': palette.texture,
     // Accent tints, as 8-digit hex. Partly-watched borders, checked episodes
     // and the torn seam are all the accent at reduced strength.
     '--era-accent-soft': `${palette.accent}99`,

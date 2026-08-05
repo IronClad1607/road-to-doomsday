@@ -10,9 +10,7 @@ interface ProgressRow {
 
 interface PreferencesRow {
   mode: Mode;
-  open_era: string | null;
-  hide_logged: boolean;
-  open_series: string[] | null;
+  idx: number | null;
 }
 
 /**
@@ -28,11 +26,7 @@ export async function fetchRemoteState(userId: string): Promise<TrackerState | n
   try {
     const [progress, preferences] = await Promise.all([
       supabase.from('progress').select('entry_id, episodes').eq('user_id', userId),
-      supabase
-        .from('preferences')
-        .select('mode, open_era, hide_logged, open_series')
-        .eq('user_id', userId)
-        .maybeSingle(),
+      supabase.from('preferences').select('mode, idx').eq('user_id', userId).maybeSingle(),
     ]);
     if (progress.error) throw progress.error;
     if (preferences.error) throw preferences.error;
@@ -46,9 +40,7 @@ export async function fetchRemoteState(userId: string): Promise<TrackerState | n
     return {
       mode: prefs?.mode ?? DEFAULT_STATE.mode,
       watched,
-      open: prefs?.open_series ?? [],
-      openEra: prefs?.open_era ?? null,
-      hideLogged: prefs?.hide_logged ?? false,
+      idx: prefs?.idx ?? 0,
     };
   } catch {
     return null;
@@ -92,9 +84,7 @@ export async function pushRemoteState(userId: string, state: TrackerState): Prom
       {
         user_id: userId,
         mode: state.mode,
-        open_era: state.openEra,
-        hide_logged: state.hideLogged,
-        open_series: [...state.open],
+        idx: state.idx,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' },
@@ -115,7 +105,7 @@ export async function pushRemoteState(userId: string, state: TrackerState): Prom
  * discard either side. Same union rule as file import.
  */
 export function reconcile(local: TrackerState, remote: TrackerState): TrackerState {
-  // Union of both logs, keeping the view state and plan of the browser you are
+  // Union of both logs, keeping the plan and position of the browser you are
   // actually sitting in front of.
-  return { ...mergeStates(local, remote), mode: local.mode };
+  return { ...mergeStates(local, remote), mode: local.mode, idx: local.idx };
 }

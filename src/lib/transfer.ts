@@ -10,7 +10,6 @@ export interface ExportPayload {
   exportedAt: string;
   mode: TrackerState['mode'];
   watched: TrackerState['watched'];
-  open: readonly string[];
 }
 
 export function buildExport(state: TrackerState): ExportPayload {
@@ -20,7 +19,6 @@ export function buildExport(state: TrackerState): ExportPayload {
     exportedAt: new Date().toISOString(),
     mode: state.mode,
     watched: state.watched,
-    open: state.open,
   };
 }
 
@@ -92,10 +90,8 @@ export function mergeStates(current: TrackerState, incoming: TrackerState): Trac
   return {
     mode: incoming.mode,
     watched,
-    open: [...new Set([...current.open, ...incoming.open])],
-    // View state is local to this browser, not part of the log — importing
-    // someone's backup should not yank the accordion open somewhere else.
-    openEra: current.openEra,
-    hideLogged: current.hideLogged,
+    // Position is local to this browser, not part of the log — importing a
+    // backup should not teleport you somewhere else along the route.
+    idx: current.idx,
   };
 }
