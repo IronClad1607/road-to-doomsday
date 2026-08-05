@@ -103,10 +103,10 @@ export function RouteHeader({
           title={
             perWeek === null
               ? 'Plan complete'
-              : `${perWeek} hours per week needed. Log a few more entries and this becomes a projected finish date.`
+              : `${perWeek} hours per week needed from here. After ${forecast.daysNeeded ?? 3} days of logging this becomes a projected finish date — ${forecast.events ?? 0} events over ${forecast.daysOfData ?? 0} days so far.`
           }
         >
-          {perWeek === null ? 'CLEARED' : `${perWeek} H/WK`}
+          {perWeek === null ? 'CLEARED' : `REQ ${perWeek} H/WK`}
         </div>
       )}
 

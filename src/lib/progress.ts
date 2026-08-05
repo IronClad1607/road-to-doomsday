@@ -318,6 +318,10 @@ export interface Projection {
   observedPerWeek?: number;
   /** Days past the deadline the plan lands. Negative means days to spare. */
   daysLate?: number;
+  /** How close the history is to arming a projection. */
+  events?: number;
+  daysOfData?: number;
+  daysNeeded?: number;
 }
 
 /** Recent window preferred, so a change of habit shows up rather than averaging out. */
@@ -338,6 +342,15 @@ export function project(
     .filter((event) => !Number.isNaN(event.at))
     .sort((a, b) => a.at - b.at);
 
+  const spanDays = parsed.length
+    ? (now - (parsed[0]?.at ?? now)) / 86_400_000
+    : 0;
+  const pending = {
+    events: parsed.length,
+    daysOfData: Math.floor(spanDays * 10) / 10,
+    daysNeeded: MIN_SPAN_MS / 86_400_000,
+  };
+
   const recent = parsed.filter((event) => now - event.at <= RECENT_WINDOW_MS);
 
   // Nothing at all lately, but a history behind it. Averaging the whole run
@@ -346,7 +359,7 @@ export function project(
   if (recent.length === 0 && parsed.length > 0) return { kind: 'stalled' };
 
   const sample = recent.length >= MIN_EVENTS ? recent : parsed;
-  if (sample.length < MIN_EVENTS) return { kind: 'insufficient' };
+  if (sample.length < MIN_EVENTS) return { kind: 'insufficient', ...pending };
 
   const first = sample[0];
   const last = sample[sample.length - 1];
@@ -355,11 +368,11 @@ export function project(
   // Measure to now, not to the last event: a week of doing nothing since is
   // part of the rate, and ignoring it would flatter a stalled run.
   const spanMs = Math.max(now - first.at, MIN_SPAN_MS);
-  if (now - first.at < MIN_SPAN_MS) return { kind: 'insufficient' };
+  if (now - first.at < MIN_SPAN_MS) return { kind: 'insufficient', ...pending };
 
   const minutes = sample.reduce((total, event) => total + event.minutes, 0);
   const perWeek = (minutes / spanMs) * WEEK_MS;
-  if (perWeek <= 0) return { kind: 'insufficient' };
+  if (perWeek <= 0) return { kind: 'insufficient', ...pending };
 
   const msNeeded = (remainingMinutes / perWeek) * WEEK_MS;
   const daysLate = Math.round((msNeeded - msRemaining) / 86_400_000);

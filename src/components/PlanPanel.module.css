@@ -306,3 +306,12 @@
 .accountWarn {
   color: #d9a15c;
 }
+
+/* Says what the projection is doing, including while it is still arming. */
+.forecast {
+  font-size: var(--fs-micro);
+  letter-spacing: 0.12em;
+  color: var(--shell-dim);
+  line-height: 1.7;
+  margin: 6px 0 0;
+}

@@ -8,6 +8,7 @@ import {
   hoursForMode,
   isUnlocked,
   paceLabel,
+  project,
   type Readiness as ReadinessData,
 } from '../lib/progress';
 import type { TrackerState } from '../lib/storage';
@@ -81,6 +82,25 @@ export function PlanPanel({
     readiness.totalMinutes - readiness.doneMinutes,
   );
   const unlocked = isUnlocked(readiness.pct);
+  const remaining = readiness.totalMinutes - readiness.doneMinutes;
+  const forecast = project(snapshot.history, remaining, Math.max(0, DOOMSDAY_AT - Date.now()));
+
+  // Spell out what the projection is doing, including while it is still
+  // gathering data — otherwise the feature is invisible until it fires.
+  const forecastLine =
+    forecast.kind === 'projected'
+      ? `${forecast.observedPerWeek} H/WK OBSERVED · FINISHES ${
+          forecast.daysLate! > 0
+            ? `${forecast.daysLate} DAYS LATE`
+            : `${Math.abs(forecast.daysLate!)} DAYS EARLY`
+        }`
+      : forecast.kind === 'stalled'
+        ? 'NOTHING LOGGED IN FOUR WEEKS · PROJECTION PAUSED'
+        : forecast.kind === 'cleared'
+          ? 'PLAN COMPLETE'
+          : `GATHERING DATA · ${forecast.events ?? 0} ENTRIES OVER ${
+              forecast.daysOfData ?? 0
+            } DAYS · PROJECTION NEEDS ${forecast.daysNeeded ?? 3}`;
 
   const handlePurge = () => {
     if (!armed) {
@@ -135,6 +155,7 @@ export function PlanPanel({
           </span>
           <span>{pace}</span>
         </div>
+        <p className={styles.forecast}>{forecastLine}</p>
 
         <h3 className={styles.ladderHeading}>CLEARANCE LADDER</h3>
         <ul className={styles.ranks}>

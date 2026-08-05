@@ -60,11 +60,14 @@ export async function pushRemoteState(userId: string, state: TrackerState): Prom
   if (!supabase) return false;
 
   try {
+    // `updated_at` is deliberately not sent. Upsert only writes the columns it
+    // is given, so leaving it out preserves each row's insert time — roughly
+    // when the entry was first logged. Sending a fresh timestamp rewrote every
+    // row on every sync, which destroyed that record entirely.
     const rows = Object.entries(state.watched).map(([entryId, progress]) => ({
       user_id: userId,
       entry_id: entryId,
       episodes: Array.isArray(progress) ? [...progress] : null,
-      updated_at: new Date().toISOString(),
     }));
 
     if (rows.length) {
