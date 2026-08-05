@@ -29,17 +29,27 @@ if (!KEY) {
 /**
  * Entries whose title search does not resolve cleanly, pinned by TMDB id.
  * `season` is the season number to pull episodes from (default 1).
+ *
+ * Every id here must be looked up against TMDB, never recalled — a wrong id
+ * fails silently, producing a plausible-looking row for the wrong title. The
+ * verification pass at the end of this script exists to catch exactly that.
  */
 const OVERRIDES = {
-  EOW: { type: 'tv', id: 114472 },
+  // Search picks "Hotel Inhumans" over the Marvel series.
+  INH: { type: 'tv', id: 68716 },
+  // Titles TMDB spells differently enough that containment fails.
+  GHS: { type: 'movie', id: 774752 },
+  FF4: { type: 'movie', id: 617126 },
+  XM2: { type: 'movie', id: 36658 },
+  EOW: { type: 'tv', id: 241388 },
   DD1: { type: 'tv', id: 61889, season: 1 },
   DD2: { type: 'tv', id: 61889, season: 2 },
   DD3: { type: 'tv', id: 61889, season: 3 },
   JJ1: { type: 'tv', id: 38472, season: 1 },
   JJ2: { type: 'tv', id: 38472, season: 2 },
   JJ3: { type: 'tv', id: 38472, season: 3 },
-  LC1: { type: 'tv', id: 61550, season: 1 },
-  LC2: { type: 'tv', id: 61550, season: 2 },
+  LC1: { type: 'tv', id: 62126, season: 1 },
+  LC2: { type: 'tv', id: 62126, season: 2 },
   IF1: { type: 'tv', id: 62127, season: 1 },
   IF2: { type: 'tv', id: 62127, season: 2 },
   PN1: { type: 'tv', id: 67178, season: 1 },
@@ -49,10 +59,10 @@ const OVERRIDES = {
   WI1: { type: 'tv', id: 91363, season: 1 },
   WI2: { type: 'tv', id: 91363, season: 2 },
   WI3: { type: 'tv', id: 91363, season: 3 },
-  X97: { type: 'tv', id: 155537, season: 1 },
-  X98: { type: 'tv', id: 155537, season: 2 },
-  YFN: { type: 'tv', id: 111110, season: 1 },
-  YF2: { type: 'tv', id: 111110, season: 2 },
+  X97: { type: 'tv', id: 138502, season: 1 },
+  X98: { type: 'tv', id: 138502, season: 2 },
+  YFN: { type: 'tv', id: 138503, season: 1 },
+  YF2: { type: 'tv', id: 138503, season: 2 },
   DBA: { type: 'tv', id: 202555, season: 1 },
 };
 
@@ -77,6 +87,37 @@ function parseTitle(title) {
   return m ? { base: m[1], season: Number(m[2]) } : { base: title, season: 1 };
 }
 
+/** Lowercase, strip punctuation, collapse whitespace. */
+const normalise = (title) =>
+  title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+/**
+ * Score a candidate against the title we asked for.
+ *
+ * Popularity alone is actively wrong here: every entry sits in a franchise
+ * whose later, bigger films outrank it, so "Thor" resolves to Ragnarok and
+ * "Captain Marvel" to Brave New World. Title agreement has to dominate, with
+ * popularity only breaking ties between equally good matches.
+ */
+function score(candidate, wanted) {
+  const got = normalise(candidate.title ?? candidate.name ?? '');
+  const want = normalise(wanted);
+  const popularity = Math.min(candidate.popularity ?? 0, 999) / 1000;
+
+  if (got === want) return 1000 + popularity;
+  // Handles "Inhumans" -> "Marvel's Inhumans" and "X2: X-Men United" -> "X2",
+  // preferring the least amount of extra wording.
+  if (got.includes(want) || want.includes(got)) {
+    // Comfortably above the weak-match threshold even when the extra wording
+    // is long ("Inhumans" -> "Marvel's Inhumans", "X2: X-Men United" -> "X2").
+    return 600 - Math.abs(got.length - want.length) + popularity;
+  }
+  return popularity;
+}
+
 async function resolve(entry) {
   const pinned = OVERRIDES[entry.id];
   const { base, season } = parseTitle(entry.title);
@@ -84,9 +125,20 @@ async function resolve(entry) {
 
   const type = entry.kind === 'series' ? 'tv' : 'movie';
   const found = await tmdb(`/search/${type}`, { query: base, include_adult: false });
-  const best = (found.results ?? []).sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0))[0];
+  const ranked = (found.results ?? [])
+    .map((candidate) => ({ candidate, value: score(candidate, base) }))
+    .sort((a, b) => b.value - a.value);
+  const best = ranked[0];
   if (!best) return null;
-  return { type, id: best.id, season, pinned: false, score: best.popularity ?? 0 };
+  return {
+    type,
+    id: best.candidate.id,
+    season,
+    pinned: false,
+    // Below the containment threshold nothing actually agreed on the title.
+    weak: best.value < 500,
+    matchedTitle: best.candidate.title ?? best.candidate.name,
+  };
 }
 
 async function watchLink(type, id) {
@@ -139,8 +191,10 @@ for (const entry of entries) {
     );
 
     if (match.type === 'tv') {
-      const season = await tmdb(`/tv/${match.id}/season/${match.season}`);
-      (season.episodes ?? []).forEach((ep, index) => {
+      // An unaired season 404s. That is expected for anything still upcoming,
+      // so keep the title's media and simply carry no episode detail.
+      const season = await tmdb(`/tv/${match.id}/season/${match.season}`).catch(() => null);
+      (season?.episodes ?? []).forEach((ep, index) => {
         episodeRows.push(
           `  (${sq(entry.id)}, ${index}, ${sq(ep.name)}, ${sq(ep.overview)}, ` +
             `${sq(ep.still_path)}, ${sq(ep.air_date)}, ${num(ep.runtime ?? null)})`,
@@ -151,7 +205,7 @@ for (const entry of entries) {
     report.push({
       id: entry.id,
       title: entry.title,
-      status: match.pinned ? 'pinned' : 'searched',
+      status: match.pinned ? 'pinned' : match.weak ? 'WEAK MATCH' : 'searched',
       matched: detail.title ?? detail.name,
     });
   } catch (error) {
@@ -198,9 +252,9 @@ if (bad.length) {
   console.log('\nNeeds attention (pin these in OVERRIDES):');
   for (const r of bad) console.log(`  ${r.id.padEnd(5)} ${r.title} — ${r.status}`);
 }
-console.log('\nSearched matches worth eyeballing:');
+console.log('\nRenamed matches worth eyeballing:');
 for (const r of report.filter((x) => x.status === 'searched')) {
-  if (r.matched && r.matched.toLowerCase() !== parseTitle(r.title).base.toLowerCase()) {
+  if (r.matched && normalise(r.matched) !== normalise(parseTitle(r.title).base)) {
     console.log(`  ${r.id.padEnd(5)} ${r.title}  ->  ${r.matched}`);
   }
 }
