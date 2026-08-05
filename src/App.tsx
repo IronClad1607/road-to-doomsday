@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AuthGate, AuthLoading } from './components/AuthGate';
 import { PlanPanel } from './components/PlanPanel';
 import { Rail } from './components/Rail';
 import { RouteHeader } from './components/RouteHeader';
@@ -86,6 +87,14 @@ export function App() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [goTo, tracker.idx, planOpen]);
+
+  // Sign-in is a hard gate: nothing behind it renders without a session.
+  //
+  // Except when Supabase is not configured at all — a fork or a local build
+  // with no credentials has no way to sign in, and bricking it would be worse
+  // than letting it run on browser-local progress.
+  if (auth.status === 'loading') return <AuthLoading />;
+  if (auth.status === 'signed-out') return <AuthGate auth={auth} />;
 
   return (
     <div className={styles.shell}>

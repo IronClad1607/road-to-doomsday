@@ -1,0 +1,124 @@
+.gate {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px var(--content-pad);
+  background: radial-gradient(120% 90% at 50% 0%, rgba(31, 61, 43, 0.55), transparent 70%),
+    var(--shell-bg);
+  text-align: center;
+}
+
+.lockup {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 0.82;
+  letter-spacing: -0.01em;
+  font-size: clamp(44px, 13vw, 88px);
+  text-transform: uppercase;
+  color: var(--shell-ink);
+}
+
+.lockupAccent {
+  display: block;
+  letter-spacing: normal;
+  color: var(--green);
+  -webkit-text-stroke: 1px var(--gold);
+  text-shadow: 0 0 34px rgba(47, 107, 69, 0.55);
+}
+
+.showtime {
+  font-size: var(--fs-label);
+  letter-spacing: 0.2em;
+  color: var(--gold);
+}
+
+.blurb {
+  font-size: var(--fs-body);
+  line-height: 1.65;
+  color: var(--shell-muted);
+  max-width: 42ch;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  width: min(420px, 100%);
+}
+
+.input {
+  flex: 1;
+  min-width: 180px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--shell-line);
+  background: var(--shell-panel);
+  color: var(--shell-ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+.input::placeholder {
+  color: var(--shell-dim);
+}
+
+.submit {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--gold);
+  color: var(--shell-ink);
+  font-size: var(--fs-label);
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.submit:hover:not(:disabled) {
+  background: linear-gradient(160deg, #1b2a1f, #12100d);
+}
+
+.submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.status {
+  font-size: var(--fs-label);
+  letter-spacing: 0.14em;
+  color: var(--green);
+  min-height: 1.4em;
+  margin: 0;
+}
+
+.statusError {
+  color: #d9a15c;
+}
+
+.note {
+  font-size: var(--fs-micro);
+  letter-spacing: 0.12em;
+  color: var(--shell-dim);
+  line-height: 1.8;
+  max-width: 46ch;
+  margin: 0;
+}
+
+/* Shown while the session is still being restored, so a signed-in reload does
+   not flash the sign-in wall. */
+.loading {
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--shell-bg);
+  color: var(--shell-muted);
+  font-size: var(--fs-label);
+  letter-spacing: 0.2em;
+}

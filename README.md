@@ -31,8 +31,9 @@ arrow keys. Marking something watched stamps it LOGGED and carries you to the ne
   hours-per-week you need to sustain to finish before release.
 - **Clearance ladder** — six ranks from `CIVILIAN BYSTANDER` to `WORTHY`.
 - **A finale panel** sealed until your plan hits 100%.
-- **Progress persists** in the browser, and survives reloads. With Supabase configured, it
-  also syncs across devices behind an email magic link.
+- **Sign-in is required** when Supabase is configured — a blocking magic-link gate, so
+  progress always belongs to an account and follows you to every device. A build with no
+  credentials skips the gate and runs on browser-local progress instead.
 - **Export and import** your log as a JSON file, to back it up or move it to another
   browser or machine. Import *merges* — watched stays watched and episode lists union, so a
   restore can never delete progress you made since the export.
@@ -68,7 +69,7 @@ src/
   hooks/       useTracker  — watch state, route position, advance sequence
                useAuth     — Supabase session; 'disabled' when unconfigured
                useCountdown — the 1s tick, isolated so the stage doesn't re-render
-  components/  RouteHeader, Stage, Rail, PlanPanel, Archive, AccountControls
+  components/  AuthGate, RouteHeader, Stage, Rail, PlanPanel, Archive, AccountControls
   supabase/    migrations/ — schema and RLS; seed/ — generated catalog
   styles/      global.css — shell tokens; eraVars.ts — per-era CSS custom properties
 ```
@@ -114,7 +115,10 @@ and progress syncs across devices behind a magic-link sign-in.
    [`supabase/seed/catalog.sql`](supabase/seed/catalog.sql). The seed must run there rather
    than from the app: the catalog tables have no write policy.
 2. Auth → Providers: enable **Email**. Auth → URL Configuration: add your redirect URLs
-   (`http://localhost:5173` and the deployed URL).
+   (`http://localhost:5173/**` and the deployed URL with `/**`). Sign-in is a hard gate, so
+   a wrong redirect URL locks the app out entirely.
+   A new project's built-in mailer only delivers to the address on your Supabase account and
+   is rate-limited — add real SMTP under Auth → Emails before anyone else can sign in.
 3. Locally: `cp .env.example .env.local` and fill in the two values.
 4. For deploys: add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as repository secrets
    (Settings → Secrets and variables → Actions).
