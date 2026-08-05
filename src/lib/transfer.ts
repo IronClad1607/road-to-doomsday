@@ -1,4 +1,4 @@
-import { sanitiseState, type TrackerState } from './storage';
+import { HISTORY_LIMIT, sanitiseState, type TrackerState } from './storage';
 
 /** Marker so an imported file can be recognised as ours. */
 const APP_ID = 'road-to-doomsday';
@@ -61,6 +61,23 @@ export function entryCount(state: TrackerState): number {
   return Object.keys(state.watched).length;
 }
 
+/** Union two event logs, de-duplicated and oldest first. */
+function mergeHistory(
+  current: TrackerState['history'],
+  incoming: TrackerState['history'],
+): TrackerState['history'] {
+  const seen = new Set<string>();
+  const merged: { at: string; minutes: number }[] = [];
+  for (const event of [...current, ...incoming]) {
+    const key = `${event.at}|${event.minutes}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(event);
+  }
+  merged.sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+  return merged.slice(-HISTORY_LIMIT);
+}
+
 /**
  * Fold an imported log into the current one.
  *
@@ -93,5 +110,8 @@ export function mergeStates(current: TrackerState, incoming: TrackerState): Trac
     // Position is local to this browser, not part of the log — importing a
     // backup should not teleport you somewhere else along the route.
     idx: current.idx,
+    // Union by timestamp+minutes, so re-importing the same backup cannot
+    // double-count and inflate the observed pace.
+    history: mergeHistory(current.history, incoming.history),
   };
 }

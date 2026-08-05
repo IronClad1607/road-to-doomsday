@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Entry, Mode, Series } from '../data/types';
 import { fetchRemoteState, pushRemoteState, reconcile } from '../lib/remoteProgress';
-import { statusOf, type WatchedState } from '../lib/progress';
-import { flush, load, save, type TrackerState } from '../lib/storage';
+import { minutesWatched, statusOf, type WatchedState } from '../lib/progress';
+import { HISTORY_LIMIT, flush, load, save, type TrackerState } from '../lib/storage';
 import { mergeStates } from '../lib/transfer';
 
 /**
@@ -15,6 +15,22 @@ export const SLIDE_OUT_MS = 190;
 export const SLIDE_IN_MS = 280;
 
 export type Anim = 'in' | 'out';
+
+/**
+ * Record minutes added, so pace can be measured rather than only demanded.
+ *
+ * Only increases are logged — unmarking is a correction, not negative viewing,
+ * and letting it subtract would make the observed rate meaningless.
+ */
+function appendEvent(
+  history: TrackerState['history'],
+  deltaMinutes: number,
+): TrackerState['history'] {
+  if (deltaMinutes <= 0) return history;
+  return [...history, { at: new Date().toISOString(), minutes: deltaMinutes }].slice(
+    -HISTORY_LIMIT,
+  );
+}
 
 export interface Tracker {
   mode: Mode;
@@ -180,7 +196,8 @@ export function useTracker(userId: string | null, routeLength: number): Tracker 
       let completed = false;
       update((prev) => {
         const watched = { ...prev.watched };
-        const before = statusOf(entry, watched[entry.id]);
+        const was = statusOf(entry, watched[entry.id]);
+        const minutesBefore = minutesWatched(entry, watched[entry.id]);
 
         if (entry.kind === 'film') {
           if (watched[entry.id]) delete watched[entry.id];
@@ -193,8 +210,9 @@ export function useTracker(userId: string | null, routeLength: number): Tracker 
         }
 
         // Only completing advances. Unmarking must never move you on.
-        completed = before !== 'full' && statusOf(entry, watched[entry.id]) === 'full';
-        return { ...prev, watched };
+        completed = was !== 'full' && statusOf(entry, watched[entry.id]) === 'full';
+        const delta = minutesWatched(entry, watched[entry.id]) - minutesBefore;
+        return { ...prev, watched, history: appendEvent(prev.history, delta) };
       });
       if (completed) advance();
     },
@@ -206,6 +224,7 @@ export function useTracker(userId: string | null, routeLength: number): Tracker 
       let completed = false;
       update((prev) => {
         const current = prev.watched[entry.id];
+        const minutesBefore = minutesWatched(entry, current);
         const episodes = Array.isArray(current) ? [...current] : [];
         const at = episodes.indexOf(index);
         if (at >= 0) episodes.splice(at, 1);
@@ -217,7 +236,8 @@ export function useTracker(userId: string | null, routeLength: number): Tracker 
 
         completed =
           statusOf(entry, current) !== 'full' && statusOf(entry, watched[entry.id]) === 'full';
-        return { ...prev, watched };
+        const delta = minutesWatched(entry, watched[entry.id]) - minutesBefore;
+        return { ...prev, watched, history: appendEvent(prev.history, delta) };
       });
       if (completed) advance();
     },

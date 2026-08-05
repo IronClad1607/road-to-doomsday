@@ -121,6 +121,7 @@ export function App() {
         logged={logged}
         pct={readiness.pct}
         remainingMinutes={readiness.totalMinutes - readiness.doneMinutes}
+        history={tracker.snapshot.history}
         planOpen={planOpen}
         onTogglePlan={() => setPlanOpen((open) => !open)}
         onOpenSearch={() => setSearchOpen(true)}

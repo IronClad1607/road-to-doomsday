@@ -305,6 +305,67 @@ export interface Pace {
   severity: PaceSeverity;
 }
 
+/**
+ * Finish-date projection from observed logging rate.
+ *
+ * `insufficient` is a first-class answer, not a failure: with one or two
+ * events there is no rate worth extrapolating, and a confident-looking date
+ * built on nothing would be worse than admitting we cannot say yet.
+ */
+export interface Projection {
+  kind: 'cleared' | 'insufficient' | 'stalled' | 'projected';
+  /** Observed hours per week over the sampled window. */
+  observedPerWeek?: number;
+  /** Days past the deadline the plan lands. Negative means days to spare. */
+  daysLate?: number;
+}
+
+/** Recent window preferred, so a change of habit shows up rather than averaging out. */
+const RECENT_WINDOW_MS = 28 * 86_400_000;
+const MIN_EVENTS = 3;
+const MIN_SPAN_MS = 3 * 86_400_000;
+
+export function project(
+  history: readonly { at: string; minutes: number }[],
+  remainingMinutes: number,
+  msRemaining: number,
+  now: number = Date.now(),
+): Projection {
+  if (remainingMinutes <= 0) return { kind: 'cleared' };
+
+  const parsed = history
+    .map((event) => ({ at: Date.parse(event.at), minutes: event.minutes }))
+    .filter((event) => !Number.isNaN(event.at))
+    .sort((a, b) => a.at - b.at);
+
+  const recent = parsed.filter((event) => now - event.at <= RECENT_WINDOW_MS);
+
+  // Nothing at all lately, but a history behind it. Averaging the whole run
+  // would quietly absorb the gap and report a comfortable finish date to
+  // someone who has stopped watching, so say so instead.
+  if (recent.length === 0 && parsed.length > 0) return { kind: 'stalled' };
+
+  const sample = recent.length >= MIN_EVENTS ? recent : parsed;
+  if (sample.length < MIN_EVENTS) return { kind: 'insufficient' };
+
+  const first = sample[0];
+  const last = sample[sample.length - 1];
+  if (!first || !last) return { kind: 'insufficient' };
+
+  // Measure to now, not to the last event: a week of doing nothing since is
+  // part of the rate, and ignoring it would flatter a stalled run.
+  const spanMs = Math.max(now - first.at, MIN_SPAN_MS);
+  if (now - first.at < MIN_SPAN_MS) return { kind: 'insufficient' };
+
+  const minutes = sample.reduce((total, event) => total + event.minutes, 0);
+  const perWeek = (minutes / spanMs) * WEEK_MS;
+  if (perWeek <= 0) return { kind: 'insufficient' };
+
+  const msNeeded = (remainingMinutes / perWeek) * WEEK_MS;
+  const daysLate = Math.round((msNeeded - msRemaining) / 86_400_000);
+  return { kind: 'projected', observedPerWeek: Math.round((perWeek / 60) * 10) / 10, daysLate };
+}
+
 export function pace(msRemaining: number, remainingMinutes: number): Pace {
   if (remainingMinutes <= 0) return { perWeek: null, severity: 'cleared' };
   const weeks = Math.max(0.15, msRemaining / WEEK_MS);

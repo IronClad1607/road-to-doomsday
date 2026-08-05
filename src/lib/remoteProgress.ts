@@ -11,6 +11,7 @@ interface ProgressRow {
 interface PreferencesRow {
   mode: Mode;
   idx: number | null;
+  history: { at: string; minutes: number }[] | null;
 }
 
 /**
@@ -26,7 +27,7 @@ export async function fetchRemoteState(userId: string): Promise<TrackerState | n
   try {
     const [progress, preferences] = await Promise.all([
       supabase.from('progress').select('entry_id, episodes').eq('user_id', userId),
-      supabase.from('preferences').select('mode, idx').eq('user_id', userId).maybeSingle(),
+      supabase.from('preferences').select('mode, idx, history').eq('user_id', userId).maybeSingle(),
     ]);
     if (progress.error) throw progress.error;
     if (preferences.error) throw preferences.error;
@@ -41,6 +42,7 @@ export async function fetchRemoteState(userId: string): Promise<TrackerState | n
       mode: prefs?.mode ?? DEFAULT_STATE.mode,
       watched,
       idx: prefs?.idx ?? 0,
+      history: prefs?.history ?? [],
     };
   } catch {
     return null;
@@ -85,6 +87,7 @@ export async function pushRemoteState(userId: string, state: TrackerState): Prom
         user_id: userId,
         mode: state.mode,
         idx: state.idx,
+        history: state.history,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' },

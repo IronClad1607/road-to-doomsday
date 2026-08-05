@@ -1,5 +1,6 @@
 import { useCountdown } from '../hooks/useCountdown';
-import { pace } from '../lib/progress';
+import { pace, project } from '../lib/progress';
+import type { TrackerState } from '../lib/storage';
 import styles from './RouteHeader.module.css';
 
 interface RouteHeaderProps {
@@ -9,6 +10,8 @@ interface RouteHeaderProps {
   pct: number;
   /** Minutes of the plan still unwatched, for the pace readout. */
   remainingMinutes: number;
+  /** Logging history, for the finish-date projection. */
+  history: TrackerState['history'];
   planOpen: boolean;
   onTogglePlan: () => void;
   onOpenSearch: () => void;
@@ -20,12 +23,16 @@ export function RouteHeader({
   logged,
   pct,
   remainingMinutes,
+  history,
   planOpen,
   onTogglePlan,
   onOpenSearch,
 }: RouteHeaderProps) {
   const { days, hours, minutes, seconds, msRemaining } = useCountdown();
   const { perWeek, severity } = pace(msRemaining, remainingMinutes);
+  // Prefer the measured projection; fall back to the required pace until there
+  // is enough history to say anything honest about the rate.
+  const forecast = project(history, remainingMinutes, msRemaining);
 
   return (
     <header className={styles.header}>
@@ -68,13 +75,40 @@ export function RouteHeader({
         </div>
       </div>
 
-      {/* Required pace, not achieved pace — nothing records watch dates. */}
-      <div
-        className={`${styles.pace} ${styles['pace_' + severity]}`}
-        title={perWeek === null ? 'Plan complete' : `${perWeek} hours per week needed to finish before release`}
-      >
-        {perWeek === null ? 'CLEARED' : `${perWeek} H/WK`}
-      </div>
+      {forecast.kind === 'stalled' ? (
+        <div
+          className={`${styles.pace} ${styles.pace_critical}`}
+          title={`Nothing logged in four weeks. ${perWeek} hours per week needed from here.`}
+        >
+          STALLED
+        </div>
+      ) : forecast.kind === 'projected' ? (
+        <div
+          className={`${styles.pace} ${
+            forecast.daysLate! > 0 ? styles.pace_critical : styles.pace_cleared
+          }`}
+          title={`At ${forecast.observedPerWeek} h/week observed, you finish ${
+            forecast.daysLate! > 0
+              ? `${forecast.daysLate} days after release`
+              : `${Math.abs(forecast.daysLate!)} days before release`
+          }. Required: ${perWeek} h/week.`}
+        >
+          {forecast.daysLate! > 0
+            ? `${forecast.daysLate}D LATE`
+            : `${Math.abs(forecast.daysLate!)}D SPARE`}
+        </div>
+      ) : (
+        <div
+          className={`${styles.pace} ${styles['pace_' + severity]}`}
+          title={
+            perWeek === null
+              ? 'Plan complete'
+              : `${perWeek} hours per week needed. Log a few more entries and this becomes a projected finish date.`
+          }
+        >
+          {perWeek === null ? 'CLEARED' : `${perWeek} H/WK`}
+        </div>
+      )}
 
       <button
         type="button"

@@ -90,7 +90,11 @@ export function Stage({
             <div className={styles.meta}>
               <span className={styles.chip}>{entry.year}</span>
               <span className={styles.runtime}>{runtimeLabel(entry)}</span>
-              {entry.stingers > 0 && <span className={styles.stingers}>{stingerLabel(entry)}</span>}
+              {entry.stingers > 0 && (
+                <span className={styles.stingers}>
+                  {stingerLabel(entry)} · STAY THROUGH THE CREDITS
+                </span>
+              )}
               {entry.drop && <span className={styles.drop}>{entry.drop}</span>}
             </div>
 
@@ -162,6 +166,12 @@ export function Stage({
               {stamped && (
                 <div className={styles.stamp}>
                   <span className={styles.stampInk}>LOGGED</span>
+                  {entry.stingers > 0 && (
+                    <span className={styles.stampAsk}>
+                      {entry.stingers === 1 ? '1 STINGER' : `${entry.stingers} STINGERS`} · DID YOU
+                      STAY?
+                    </span>
+                  )}
                 </div>
               )}
             </div>

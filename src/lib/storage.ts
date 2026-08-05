@@ -22,17 +22,35 @@ const SCHEMA_VERSION = 3;
  */
 const WRITE_DELAY_MS = 200;
 
+/**
+ * One logging event: minutes *added* at a moment in time.
+ *
+ * Only increases are recorded — unmarking never contributes, or the observed
+ * rate could go negative.
+ */
+export interface WatchEvent {
+  /** ISO-8601. */
+  at: string;
+  minutes: number;
+}
+
+/** Most recent events kept. Bounds both localStorage and the synced payload. */
+export const HISTORY_LIMIT = 400;
+
 export interface TrackerState {
   mode: Mode;
   watched: WatchedState;
   /** Position along the derived route. Clamped whenever the route changes. */
   idx: number;
+  /** Append-only log of minutes watched, oldest first. */
+  history: readonly WatchEvent[];
 }
 
 export const DEFAULT_STATE: TrackerState = {
   mode: 'completionist',
   watched: {},
   idx: 0,
+  history: [],
 };
 
 const ENTRIES_BY_ID = new Map<string, Entry>(ALL_ENTRIES.map((entry) => [entry.id, entry]));
@@ -89,7 +107,23 @@ export function sanitiseState(raw: unknown): TrackerState {
   const idx =
     typeof input.idx === 'number' && Number.isInteger(input.idx) && input.idx >= 0 ? input.idx : 0;
 
-  return { mode, watched, idx };
+  const history = Array.isArray(input.history)
+    ? (input.history as unknown[])
+        .filter((event): event is WatchEvent => {
+          if (typeof event !== 'object' || event === null) return false;
+          const candidate = event as Record<string, unknown>;
+          return (
+            typeof candidate.at === 'string' &&
+            !Number.isNaN(Date.parse(candidate.at)) &&
+            typeof candidate.minutes === 'number' &&
+            Number.isFinite(candidate.minutes) &&
+            candidate.minutes > 0
+          );
+        })
+        .slice(-HISTORY_LIMIT)
+    : [];
+
+  return { mode, watched, idx, history };
 }
 
 function readKey(key: string): unknown {
@@ -145,6 +179,7 @@ export function flush(): void {
         mode: snapshot.mode,
         watched: snapshot.watched,
         idx: snapshot.idx,
+        history: snapshot.history,
       }),
     );
   } catch {
