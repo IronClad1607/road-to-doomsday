@@ -38,8 +38,9 @@
 /* The bar and its percentage share a row; the percentage under the countdown
    is what wrapped and pushed the header apart in the intermediate build. */
 .progress {
-  flex: 1;
-  min-width: 60px;
+  flex: 1 1 auto;
+  /* Must be allowed to collapse, or it pushes the clock out of the bar. */
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -47,8 +48,8 @@
 
 .meter {
   position: relative;
-  flex: 1;
-  min-width: 40px;
+  flex: 1 1 auto;
+  min-width: 24px;
   height: 7px;
   background: #1a1512;
   border: 1px solid #2a231d;
@@ -63,6 +64,7 @@
 }
 
 .percent {
+  flex: 0 0 auto;
   font-family: var(--font-display);
   font-weight: 900;
   font-size: 20px;
@@ -125,12 +127,60 @@
  * On a narrow phone the brand goes, but the station counter stays — it is the
  * route's position readout, not decoration. It just loses its wording.
  */
-@media (max-width: 640px) {
+/* The bar carries seven items now; shed them in order of least use. */
+@media (max-width: 940px) {
   .brand {
     display: none;
   }
+}
+
+@media (max-width: 640px) {
 
   .stationWords {
+    display: none;
+  }
+}
+
+/*
+ * Required hours per week, graded by how achievable that is. Deliberately not
+ * a projection — nothing records when entries were watched.
+ */
+.pace {
+  flex: 0 0 auto;
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  padding: 3px 6px;
+  border: 1px solid currentColor;
+  font-variant-numeric: tabular-nums;
+}
+
+.pace_cleared { color: var(--green); }
+.pace_steady { color: var(--shell-muted); }
+.pace_tight { color: var(--gold); }
+.pace_critical { color: #d9534f; }
+
+.icon {
+  flex: 0 0 auto;
+  width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--shell-line);
+  color: var(--shell-muted);
+  font-size: 18px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.icon:hover {
+  color: var(--shell-ink);
+  border-color: var(--gold);
+}
+
+/* On a narrow phone the pace chip goes before the search affordance does. */
+@media (max-width: 460px) {
+  .pace {
     display: none;
   }
 }

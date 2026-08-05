@@ -286,10 +286,33 @@ const WEEK_MS = 7 * 86_400_000;
  * the last days before release.
  */
 export function paceLabel(msRemaining: number, remainingMinutes: number): string {
-  if (remainingMinutes <= 0) return 'PACE CLEARED';
+  const { perWeek } = pace(msRemaining, remainingMinutes);
+  return perWeek === null ? 'PACE CLEARED' : `${perWeek} HRS/WEEK REQUIRED`;
+}
+
+/**
+ * How hard the remaining plan is, as a severity band.
+ *
+ * Note this is the pace *required*, not the pace being achieved — nothing
+ * records when entries were watched, so a genuine "you will finish N days
+ * late" projection is not computable and is deliberately not faked.
+ */
+export type PaceSeverity = 'cleared' | 'steady' | 'tight' | 'critical';
+
+export interface Pace {
+  /** Hours per week needed from here, or null once the plan is done. */
+  perWeek: number | null;
+  severity: PaceSeverity;
+}
+
+export function pace(msRemaining: number, remainingMinutes: number): Pace {
+  if (remainingMinutes <= 0) return { perWeek: null, severity: 'cleared' };
   const weeks = Math.max(0.15, msRemaining / WEEK_MS);
   const perWeek = Math.max(1, Math.round(remainingMinutes / 60 / weeks));
-  return `${perWeek} HRS/WEEK REQUIRED`;
+  // Roughly: under an hour a day is steady, under two is tight, beyond that
+  // the plan is not going to happen without a change.
+  const severity: PaceSeverity = perWeek <= 7 ? 'steady' : perWeek <= 14 ? 'tight' : 'critical';
+  return { perWeek, severity };
 }
 
 /** Total hours a mode demands, regardless of what has been watched. */

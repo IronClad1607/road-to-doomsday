@@ -4,6 +4,7 @@ import { PlanPanel } from './components/PlanPanel';
 import { Rail } from './components/Rail';
 import { RouteHeader } from './components/RouteHeader';
 import { Stage } from './components/Stage';
+import { StationSearch } from './components/StationSearch';
 import { CATALOG } from './data/catalog';
 import type { Era } from './data/types';
 import { useAuth } from './hooks/useAuth';
@@ -23,6 +24,7 @@ import './styles/global.css';
 export function App() {
   const auth = useAuth();
   const [planOpen, setPlanOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // Starts as the bundled copy so the first paint is immediate, then swaps to
   // the remote catalog if one loads. A failed fetch leaves this alone.
@@ -84,17 +86,24 @@ export function App() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setPlanOpen(false);
+        setSearchOpen(false);
         return;
       }
       const target = event.target as HTMLElement | null;
       if (target && (target.tagName === 'INPUT' || target.isContentEditable)) return;
-      if (planOpen) return;
+      if (planOpen || searchOpen) return;
+      // "/" and ⌘K are both muscle memory for search.
+      if (event.key === '/' || (event.key === 'k' && (event.metaKey || event.ctrlKey))) {
+        event.preventDefault();
+        setSearchOpen(true);
+        return;
+      }
       if (event.key === 'ArrowLeft') goTo(tracker.idx - 1);
       if (event.key === 'ArrowRight') goTo(tracker.idx + 1);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [goTo, tracker.idx, planOpen]);
+  }, [goTo, tracker.idx, planOpen, searchOpen]);
 
   // Sign-in is a hard gate: nothing behind it renders without a session.
   //
@@ -111,8 +120,10 @@ export function App() {
         total={route.length}
         logged={logged}
         pct={readiness.pct}
+        remainingMinutes={readiness.totalMinutes - readiness.doneMinutes}
         planOpen={planOpen}
         onTogglePlan={() => setPlanOpen((open) => !open)}
+        onOpenSearch={() => setSearchOpen(true)}
       />
 
       <Stage
@@ -134,6 +145,15 @@ export function App() {
         mode={tracker.mode}
         onGoTo={goTo}
       />
+
+      {searchOpen && (
+        <StationSearch
+          route={route}
+          watched={tracker.watched}
+          onGoTo={goTo}
+          onClose={() => setSearchOpen(false)}
+        />
+      )}
 
       {planOpen && (
         <PlanPanel

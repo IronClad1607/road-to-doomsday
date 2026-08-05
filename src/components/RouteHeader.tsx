@@ -1,4 +1,5 @@
 import { useCountdown } from '../hooks/useCountdown';
+import { pace } from '../lib/progress';
 import styles from './RouteHeader.module.css';
 
 interface RouteHeaderProps {
@@ -6,8 +7,11 @@ interface RouteHeaderProps {
   total: number;
   logged: number;
   pct: number;
+  /** Minutes of the plan still unwatched, for the pace readout. */
+  remainingMinutes: number;
   planOpen: boolean;
   onTogglePlan: () => void;
+  onOpenSearch: () => void;
 }
 
 export function RouteHeader({
@@ -15,10 +19,13 @@ export function RouteHeader({
   total,
   logged,
   pct,
+  remainingMinutes,
   planOpen,
   onTogglePlan,
+  onOpenSearch,
 }: RouteHeaderProps) {
-  const { days, hours, minutes, seconds } = useCountdown();
+  const { days, hours, minutes, seconds, msRemaining } = useCountdown();
+  const { perWeek, severity } = pace(msRemaining, remainingMinutes);
 
   return (
     <header className={styles.header}>
@@ -60,6 +67,23 @@ export function RouteHeader({
           {hours}:{minutes}:{seconds}
         </div>
       </div>
+
+      {/* Required pace, not achieved pace — nothing records watch dates. */}
+      <div
+        className={`${styles.pace} ${styles['pace_' + severity]}`}
+        title={perWeek === null ? 'Plan complete' : `${perWeek} hours per week needed to finish before release`}
+      >
+        {perWeek === null ? 'CLEARED' : `${perWeek} H/WK`}
+      </div>
+
+      <button
+        type="button"
+        className={styles.icon}
+        onClick={onOpenSearch}
+        aria-label="Find a station"
+      >
+        <span aria-hidden="true">⌕</span>
+      </button>
 
       <button
         type="button"
