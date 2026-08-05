@@ -15,6 +15,7 @@ import {
   nextUnseenIndex,
   statusOf,
 } from './lib/progress';
+import { EMPTY_MEDIA, loadMedia, type MediaIndex } from './lib/media';
 import { loadCatalog } from './lib/remoteCatalog';
 import styles from './App.module.css';
 import './styles/global.css';
@@ -27,10 +28,17 @@ export function App() {
   // the remote catalog if one loads. A failed fetch leaves this alone.
   const [catalog, setCatalog] = useState<readonly Era[]>(CATALOG);
 
+  // Enrichment is optional and loads independently — the route is usable the
+  // moment the catalog is, with or without artwork.
+  const [media, setMedia] = useState<MediaIndex>(EMPTY_MEDIA);
+
   useEffect(() => {
     let cancelled = false;
     void loadCatalog().then(({ catalog: loaded }) => {
       if (!cancelled) setCatalog(loaded);
+    });
+    void loadMedia().then((loaded) => {
+      if (!cancelled) setMedia(loaded);
     });
     return () => {
       cancelled = true;
@@ -112,6 +120,8 @@ export function App() {
         watched={tracker.watched}
         anim={tracker.anim}
         stamped={tracker.stamped}
+        media={station ? media.byEntry.get(station.entry.id) : undefined}
+        episodeMedia={station ? media.episodes.get(station.entry.id) : undefined}
         onToggle={tracker.toggleEntry}
         onToggleEpisode={tracker.toggleEpisode}
       />

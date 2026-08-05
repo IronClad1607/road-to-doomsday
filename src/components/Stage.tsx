@@ -1,5 +1,6 @@
 import type { Series } from '../data/types';
 import type { Anim } from '../hooks/useTracker';
+import { imageUrl, type EntryMedia, type EpisodeMedia } from '../lib/media';
 import {
   episodesWatched,
   runtimeLabel,
@@ -18,6 +19,9 @@ interface StageProps {
   watched: WatchedState;
   anim: Anim;
   stamped: boolean;
+  /** TMDB enrichment, absent until it loads — and permanently if unseeded. */
+  media: EntryMedia | undefined;
+  episodeMedia: ReadonlyMap<number, EpisodeMedia> | undefined;
   onToggle: (entry: Station['entry']) => void;
   onToggleEpisode: (entry: Series, index: number) => void;
 }
@@ -28,7 +32,16 @@ interface StageProps {
  * The era owns the whole viewport here rather than a card, so the background,
  * texture and watermark all come from the palette custom properties.
  */
-export function Stage({ station, watched, anim, stamped, onToggle, onToggleEpisode }: StageProps) {
+export function Stage({
+  station,
+  watched,
+  anim,
+  stamped,
+  media,
+  episodeMedia,
+  onToggle,
+  onToggleEpisode,
+}: StageProps) {
   if (!station) {
     return (
       <div className={styles.stage}>
@@ -45,9 +58,19 @@ export function Stage({ station, watched, anim, stamped, onToggle, onToggleEpiso
   const full = status === 'full';
   const logged = episodesWatched(entry, progress);
   const episodes = Array.isArray(progress) ? progress : [];
+  const poster = imageUrl(media?.posterPath ?? null, 'w342');
+  const backdrop = imageUrl(media?.backdropPath ?? null, 'w780');
 
   return (
     <div className={styles.stage} style={eraVars(era.palette)}>
+      {backdrop && (
+        <div
+          className={styles.backdrop}
+          style={{ backgroundImage: `url(${backdrop})` }}
+          aria-hidden="true"
+        />
+      )}
+
       <div className={styles.watermark} aria-hidden="true">
         {entry.id}
       </div>
@@ -76,6 +99,33 @@ export function Stage({ station, watched, anim, stamped, onToggle, onToggleEpiso
               {entry.clue}
             </p>
 
+            {media?.overview && <p className={styles.overview}>{media.overview}</p>}
+
+            {media && media.cast.length > 0 && (
+              <div className={styles.cast}>
+                {media.cast.slice(0, 6).map((person) => {
+                  const face = imageUrl(person.profilePath, 'w185');
+                  return (
+                    <div key={person.name} className={styles.castMember}>
+                      <div className={styles.castFace}>
+                        {face ? (
+                          <img src={face} alt="" loading="lazy" />
+                        ) : (
+                          <span aria-hidden="true">
+                            {person.name.slice(0, 1)}
+                          </span>
+                        )}
+                      </div>
+                      <div className={styles.castName}>{person.name}</div>
+                      {person.character && (
+                        <div className={styles.castRole}>{person.character}</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             <div className={styles.actions}>
               <button
                 type="button"
@@ -92,18 +142,22 @@ export function Stage({ station, watched, anim, stamped, onToggle, onToggleEpiso
 
               <a
                 className={styles.watch}
-                href={watchUrl(entry)}
+                href={watchUrl(entry, media?.watchUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {serviceLabel(entry)} ▸
+                {media?.watchUrl && !entry.url ? 'WATCH' : serviceLabel(entry)} ▸
               </a>
             </div>
           </div>
 
           <div className={styles.aside}>
             <div className={styles.poster} aria-hidden="true">
-              <div className={styles.glyph}>{entry.id}</div>
+              {poster ? (
+                <img className={styles.posterArt} src={poster} alt="" />
+              ) : (
+                <div className={styles.glyph}>{entry.id}</div>
+              )}
               <div className={styles.kind}>{entry.kind === 'series' ? 'SERIES' : 'FILM'}</div>
               {stamped && (
                 <div className={styles.stamp}>
@@ -120,6 +174,7 @@ export function Stage({ station, watched, anim, stamped, onToggle, onToggleEpiso
                 <div className={styles.episodes}>
                   {entry.episodes.map((title, index) => {
                     const done = episodes.includes(index);
+                    const detail = episodeMedia?.get(index);
                     return (
                       <button
                         key={title + index}
@@ -131,7 +186,9 @@ export function Stage({ station, watched, anim, stamped, onToggle, onToggleEpiso
                         <span className={styles.episodeNumber}>
                           {String(index + 1).padStart(2, '0')}
                         </span>
-                        <span className={styles.episodeTitle}>{title}</span>
+                        <span className={styles.episodeTitle} title={detail?.overview ?? undefined}>
+                          {detail?.name ?? title}
+                        </span>
                       </button>
                     );
                   })}

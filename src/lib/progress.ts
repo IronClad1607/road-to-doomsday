@@ -307,8 +307,12 @@ export function hoursForMode(catalog: readonly Era[], mode: Mode): number {
  * Where to watch an entry. Falls back to a JioHotstar title search, with any
  * trailing season marker stripped so `Daredevil S1` searches for `Daredevil`.
  */
-export function watchUrl(entry: Entry): string {
+export function watchUrl(entry: Entry, providerUrl?: string | null): string {
+  // A hand-set link wins; then the region's provider link from TMDB, which
+  // actually resolves to the title. The search fallback is last because it
+  // only ever lands on a results page.
   if (entry.url) return entry.url;
+  if (providerUrl) return providerUrl;
   const query = encodeURIComponent(entry.title.replace(/ S[0-9]$/, ''));
   return `https://www.hotstar.com/in/search?q=${query}`;
 }

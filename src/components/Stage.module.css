@@ -346,3 +346,92 @@
     animation: none;
   }
 }
+
+/*
+ * Real artwork, treated so it still reads as part of the era rather than a
+ * pasted-in screenshot. The backdrop sits under the texture and watermark.
+ */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 22%;
+  opacity: 0.2;
+  filter: saturate(0.7) contrast(1.05);
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.35) 62%, transparent 100%);
+  pointer-events: none;
+  transition: opacity 450ms ease;
+}
+
+.posterArt {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.overview {
+  font-size: var(--fs-label);
+  line-height: 1.65;
+  color: var(--era-sub);
+  margin: 10px 0 0;
+  max-width: 62ch;
+  opacity: 0.9;
+}
+
+.cast {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.cast::-webkit-scrollbar {
+  display: none;
+}
+
+.castMember {
+  flex: 0 0 auto;
+  width: 66px;
+  text-align: center;
+}
+
+.castFace {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--era-border);
+  background: var(--era-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 24px;
+  color: var(--era-accent);
+  filter: saturate(0.8);
+}
+
+.castFace img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.castName {
+  font-size: var(--fs-micro);
+  letter-spacing: 0.06em;
+  color: var(--era-ink);
+  margin-top: 5px;
+  line-height: 1.25;
+}
+
+.castRole {
+  font-size: var(--fs-micro);
+  color: var(--era-sub);
+  line-height: 1.25;
+  opacity: 0.75;
+}

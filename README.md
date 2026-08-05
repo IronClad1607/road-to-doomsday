@@ -162,6 +162,16 @@ Do not hand-edit `src/data/catalog.ts` — the next regeneration overwrites it.
 
 ## Notes
 
-Watch links point at JioHotstar search by default, with per-entry overrides for titles that
-live elsewhere (SonyLIV, Netflix) or are still theatrical. Nothing is scraped and no ratings
-or artwork are fetched — posters are generated from each entry's short code.
+Watch links prefer a hand-set URL, then the region's provider link from TMDB, and fall back to
+a JioHotstar search. Hotstar has no public API and renders search client-side, so its own deep
+links cannot be derived from a title — the provider link is the closest thing that actually
+resolves.
+
+Enrichment (summaries, cast, artwork, per-episode detail) comes from **TMDB**, cached into
+Supabase by `scripts/enrich-catalog.mjs` so the app never calls TMDB at runtime. It is entirely
+optional: with the media tables unseeded the app falls back to generated glyph posters and the
+clue line. Nothing is scraped — a licensed metadata API avoids the brittleness, the terms
+problems, and the copyright exposure of pulling stills off a streaming site.
+
+Artwork is served from TMDB's CDN, so a seeded deployment does make image requests to
+`image.tmdb.org` in addition to Google Fonts.
