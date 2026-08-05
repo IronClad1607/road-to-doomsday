@@ -123,6 +123,7 @@ export function App() {
           catalog={catalog}
           auth={auth}
           syncing={tracker.syncing}
+          synced={tracker.synced}
           snapshot={tracker.snapshot}
           nextUnseen={nextUnseen}
           onSelectMode={tracker.setMode}

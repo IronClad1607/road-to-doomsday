@@ -9,22 +9,24 @@ An MCU rewatch tracker counting down to *Avengers: Doomsday* — 18 Dec 2026, 09
 America, VHS tracking error for Captain Marvel, brutalist CRT amber for the TVA, yellow-and-blue
 collision rails for the Fox canon.
 
-Pick how deep you're going, check things off, and watch the readiness meter fill.
+A full-viewport **route**: one station at a time, travelled with the rail at the bottom or the
+arrow keys. Marking something watched stamps it LOGGED and carries you to the next station.
 
 ## Features
 
 - **Three watch plans** — `FOCUSED` (the Doomsday spine, ~59h), `COMPLETE` (spine plus
   recommended, ~156h), `EVERYTHING` (full canon including one-shots, Netflix, S.H.I.E.L.D.,
-  animation and the Fox rail, ~352h). Entries outside your plan stay visible but dim, and
-  readiness rescales to whatever you picked rather than punishing you for opting out.
-- **Accordion timeline** — one era open at a time, so the page stays short. On load it opens
-  the first era that still has something unwatched in your plan, not simply the first era.
-- **Sticky bar and era rail** — readiness stays pinned at any scroll depth, and a scrollable
-  chip rail jumps straight to any era. Eras with nothing in your plan are dropped entirely.
-- **Next up** — a card naming the single next unwatched entry, since with everything
-  collapsed the obvious question is "what now?".
-- **Episode-level tracking** — series expand to individual episodes, with real titles where
-  the catalog has them, so partial progress is never lost.
+  animation and the Fox rail, ~352h). The plan defines the route: entries outside it are not
+  stations at all, and readiness rescales to whatever you picked rather than punishing you
+  for opting out.
+- **One station at a time** — the page never scrolls. The era owns the whole viewport, in its
+  own palette and texture, so moving between eras reads as a reality bleed.
+- **Advance on mark** — completing an entry stamps it and slides you to the next station.
+  Completing a series' last episode does the same. Unmarking never moves you.
+- **Route rail** — the whole plan as a horizontal line, grouped into legs by era, with the
+  current station centred. Tap any node or era label to jump.
+- **Episode-level tracking** — series show every episode, with real titles where the catalog
+  has them, so partial progress is never lost.
 - **Readiness and pace** — percentage complete, hours logged against hours required, and the
   hours-per-week you need to sustain to finish before release.
 - **Clearance ladder** — six ranks from `CIVILIAN BYSTANDER` to `WORTHY`.
@@ -59,16 +61,14 @@ Vite + React + TypeScript, no state library and no UI framework.
 ```
 src/
   data/        catalog.ts — 13 eras, 90 entries (generated); types.ts — the data model
-  lib/         progress.ts — readiness/rank/pace maths (pure)
-               storage.ts  — validated, debounced localStorage persistence
+  lib/         progress.ts — readiness/rank/pace, route and leg derivation
+               storage.ts  — validated, debounced localStorage; v1 -> v3 upgrade
                transfer.ts — JSON export, import parsing, merge
-               scroll.ts   — resolves the real scroller; 96px jump offset
                supabase.ts, remoteCatalog.ts, remoteProgress.ts — optional sync
-  hooks/       useTracker  — watch state; storage, plus Supabase when signed in
+  hooks/       useTracker  — watch state, route position, advance sequence
                useAuth     — Supabase session; 'disabled' when unconfigured
-               useCountdown — the 1s tick, isolated so cards don't re-render
-  components/  Header, StatusBar, PlanPanel, NextUp, EraSection, EntryCard,
-               EpisodeGrid, Finale, Archive, AccountControls, Footer, BackToTop
+               useCountdown — the 1s tick, isolated so the stage doesn't re-render
+  components/  RouteHeader, Stage, Rail, PlanPanel, Archive, AccountControls
   supabase/    migrations/ — schema and RLS; seed/ — generated catalog
   styles/      global.css — shell tokens; eraVars.ts — per-era CSS custom properties
 ```
@@ -86,15 +86,19 @@ A few things worth knowing:
   user-supplied, so even less trustworthy than something this app wrote itself.
 - **Entries are keyed by short code** (`CA1`, `DPW`) — stable ids, so reordering the catalog
   never remaps someone's saved progress.
-- **Re-render scope is deliberate.** The countdown owns its own tick, and each card is
-  memoised on its own slice of watch state, so a second passing doesn't redraw 90 cards and
-  checking one entry doesn't either.
-- **Only `html` clips horizontally.** Putting `overflow-x: hidden` on a wrapper div makes
-  that div the scroll container and silently disables `position: sticky` inside it; putting
-  it on `body` makes the body the scroller and turns document-level `scrollTo`/`scrollTop`
-  into no-ops. Both fail invisibly, so `lib/scroll.ts` also resolves the real scroller by
-  measurement rather than assuming one — and jumps use it instead of `scrollIntoView`, which
-  picks its own container and lands targets under the sticky bar.
+- **Re-render scope is deliberate.** The countdown owns its own tick inside the header, so a
+  second passing does not redraw the stage or the rail.
+- **Overflow rules live on `html`/`body` only.** The route view is a fixed viewport, so the
+  page itself never scrolls; the stage body and the rail opt in individually. Putting
+  `overflow` on a wrapper div makes that div the scroll container, which is what silently
+  broke sticky positioning and `scrollTo` in the previous layout. Rail centring uses
+  `scrollTo` on the rail element — `scrollIntoView` would move ancestor scrollers too.
+- **Every advance timeout is tracked.** The stamp/hold/slide sequence is several chained
+  timers; they are cleared before starting a new transition and on unmount, or rapid clicking
+  desyncs the position from the stamp.
+- **Signed in is not the same as synced.** A remote read that fails means the network is down,
+  not that the account is empty — so nothing is pushed, and the panel says sync is unavailable
+  rather than claiming success.
 
 ## Supabase (optional)
 
@@ -104,9 +108,11 @@ and progress syncs across devices behind a magic-link sign-in.
 
 **Setup**
 
-1. In the Supabase SQL editor, run [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql),
-   then [`supabase/seed/catalog.sql`](supabase/seed/catalog.sql). The seed must run there
-   rather than from the app — the catalog tables have no write policy.
+1. In the Supabase SQL editor, run the migrations in order —
+   [`0001_init.sql`](supabase/migrations/0001_init.sql) then
+   [`0002_route_state.sql`](supabase/migrations/0002_route_state.sql) — followed by
+   [`supabase/seed/catalog.sql`](supabase/seed/catalog.sql). The seed must run there rather
+   than from the app: the catalog tables have no write policy.
 2. Auth → Providers: enable **Email**. Auth → URL Configuration: add your redirect URLs
    (`http://localhost:5173` and the deployed URL).
 3. Locally: `cp .env.example .env.local` and fill in the two values.

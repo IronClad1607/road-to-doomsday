@@ -32,7 +32,13 @@ export interface Tracker {
   purge: () => void;
   merge: (incoming: TrackerState) => void;
   snapshot: TrackerState;
+  /** True while the account's log is being reconciled with this browser's. */
   syncing: boolean;
+  /**
+   * True only once a remote read has actually succeeded. Being signed in is
+   * not enough — if the read fails the UI must not claim to be synced.
+   */
+  synced: boolean;
 }
 
 /**
@@ -46,6 +52,7 @@ export function useTracker(userId: string | null, routeLength: number): Tracker 
   const [anim, setAnim] = useState<Anim>('in');
   const [stamped, setStamped] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [synced, setSynced] = useState(false);
 
   const ownerRef = useRef<string | null>(null);
   // Every pending step of an advance, so a second mark can cancel the first.
@@ -84,6 +91,7 @@ export function useTracker(userId: string | null, routeLength: number): Tracker 
   useEffect(() => {
     if (!userId) {
       ownerRef.current = null;
+      setSynced(false);
       return;
     }
     let cancelled = false;
@@ -103,6 +111,7 @@ export function useTracker(userId: string | null, routeLength: number): Tracker 
       // A failed read means the network is down, not that the account is
       // empty — so nothing is pushed and local progress is left alone.
       ownerRef.current = remote ? userId : null;
+      setSynced(remote !== null);
       setSyncing(false);
     })();
 
@@ -240,5 +249,6 @@ export function useTracker(userId: string | null, routeLength: number): Tracker 
     merge,
     snapshot: state,
     syncing,
+    synced,
   };
 }

@@ -5,6 +5,8 @@ import styles from './PlanPanel.module.css';
 interface AccountControlsProps {
   auth: Auth;
   syncing: boolean;
+  /** Whether a remote read has actually succeeded. */
+  synced: boolean;
 }
 
 /**
@@ -14,7 +16,7 @@ interface AccountControlsProps {
  * real form brings default navigation behaviour this page does not want.
  * Enter is wired up by hand so the keyboard still works.
  */
-export function AccountControls({ auth, syncing }: AccountControlsProps) {
+export function AccountControls({ auth, syncing, synced }: AccountControlsProps) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -25,15 +27,22 @@ export function AccountControls({ auth, syncing }: AccountControlsProps) {
     return (
       <div className={styles.account}>
         <div className={styles.accountRow}>
-          <span className={styles.accountEmail}>
-            {syncing ? 'SYNCING…' : `SYNCED · ${auth.email ?? 'ACCOUNT'}`}
+          {/* Signed in is not the same as syncing — say which is true. */}
+          <span className={`${styles.accountEmail} ${!syncing && !synced ? styles.accountWarn : ''}`}>
+            {syncing
+              ? 'SYNCING…'
+              : synced
+                ? `SYNCED · ${auth.email ?? 'ACCOUNT'}`
+                : 'SIGNED IN · SYNC UNAVAILABLE'}
           </span>
           <button type="button" className={styles.control} onClick={() => void auth.signOut()}>
             SIGN OUT
           </button>
         </div>
         <p className={styles.accountNote}>
-          PROGRESS SYNCS TO THIS ACCOUNT ON EVERY DEVICE
+          {synced
+            ? 'PROGRESS SYNCS TO THIS ACCOUNT ON EVERY DEVICE'
+            : 'PROGRESS IS SAVED IN THIS BROWSER ONLY — CHECK THE SUPABASE SCHEMA'}
         </p>
       </div>
     );

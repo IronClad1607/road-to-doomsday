@@ -24,6 +24,7 @@ interface PlanPanelProps {
   catalog: readonly Era[];
   auth: Auth;
   syncing: boolean;
+  synced: boolean;
   snapshot: TrackerState;
   /** Route index of the next unwatched station, or -1 when the plan is done. */
   nextUnseen: number;
@@ -44,6 +45,7 @@ export function PlanPanel({
   catalog,
   auth,
   syncing,
+  synced,
   snapshot,
   nextUnseen,
   onSelectMode,
@@ -190,7 +192,7 @@ export function PlanPanel({
         </div>
 
         <Archive state={snapshot} onImport={onImport} />
-        <AccountControls auth={auth} syncing={syncing} />
+        <AccountControls auth={auth} syncing={syncing} synced={synced} />
       </div>
     </>
   );

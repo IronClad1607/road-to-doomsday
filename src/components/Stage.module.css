@@ -16,7 +16,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--era-tex);
+  background: var(--era-tex, none);
   opacity: 0.16;
   pointer-events: none;
 }
