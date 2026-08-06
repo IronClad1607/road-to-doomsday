@@ -52,8 +52,19 @@ export function StationSearch({ route, watched, onGoTo, onClose }: StationSearch
   }, [query]);
 
   // Keep the highlighted row in view while arrowing through.
+  //
+  // Scrolled by hand rather than with scrollIntoView, which resolves its own
+  // container and can move ancestors — the same trap the rail avoids.
   useEffect(() => {
-    listRef.current?.querySelector('[data-active="1"]')?.scrollIntoView({ block: 'nearest' });
+    const list = listRef.current;
+    const row = list?.querySelector<HTMLElement>('[data-active="1"]');
+    if (!list || !row) return;
+    const top = row.offsetTop;
+    const bottom = top + row.offsetHeight;
+    if (top < list.scrollTop) list.scrollTop = top;
+    else if (bottom > list.scrollTop + list.clientHeight) {
+      list.scrollTop = bottom - list.clientHeight;
+    }
   }, [active]);
 
   const onKeyDown = (event: KeyboardEvent) => {
